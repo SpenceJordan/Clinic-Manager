@@ -16,12 +16,20 @@ const INIT_PATIENTS = [
   { id:6, first_name:"Thomas",   last_name:"Reilly",  dob:"1945-03-22", gender:"M", phone:"555-0532", insurance:"Medicare",     allergies:["Codeine"],           lastVisit:"2026-02-22" },
 ];
 const INIT_APPTS = [
-  { id:1, patient:"Margaret Chen",  type:"follow-up",   time:"09:00", duration:30, doctor:"Dr. Patel",    status:"checked-in"  },
-  { id:2, patient:"Derek Marsh",    type:"routine",     time:"09:30", duration:30, doctor:"Dr. Patel",    status:"scheduled"   },
-  { id:3, patient:"Robert Vásquez", type:"urgent",      time:"10:00", duration:30, doctor:"Dr. Williams", status:"in-progress" },
-  { id:4, patient:"Thomas Reilly",  type:"routine",     time:"10:30", duration:30, doctor:"Dr. Williams", status:"scheduled"   },
-  { id:5, patient:"Aisha Okonkwo",  type:"new-patient", time:"11:00", duration:45, doctor:"Dr. Patel",    status:"scheduled"   },
-  { id:6, patient:"Yuki Tanaka",    type:"procedure",   time:"14:00", duration:60, doctor:"Dr. Williams", status:"scheduled"   },
+  { id:1,  patient:"Margaret Chen",  type:"follow-up",   time:"09:00", duration:30, doctor:"Dr. Patel",    status:"checked-in",  date:"2026-02-25" },
+  { id:2,  patient:"Derek Marsh",    type:"routine",     time:"09:30", duration:30, doctor:"Dr. Patel",    status:"scheduled",   date:"2026-02-25" },
+  { id:3,  patient:"Robert Vásquez", type:"urgent",      time:"10:00", duration:30, doctor:"Dr. Williams", status:"in-progress", date:"2026-02-25" },
+  { id:4,  patient:"Thomas Reilly",  type:"routine",     time:"10:30", duration:30, doctor:"Dr. Williams", status:"scheduled",   date:"2026-02-25" },
+  { id:5,  patient:"Aisha Okonkwo",  type:"new-patient", time:"11:00", duration:45, doctor:"Dr. Patel",    status:"scheduled",   date:"2026-02-25" },
+  { id:6,  patient:"Yuki Tanaka",    type:"procedure",   time:"14:00", duration:60, doctor:"Dr. Williams", status:"scheduled",   date:"2026-02-25" },
+  { id:7,  patient:"Thomas Reilly",  type:"follow-up",   time:"09:00", duration:30, doctor:"Dr. Williams", status:"completed",   date:"2026-02-24" },
+  { id:8,  patient:"Derek Marsh",    type:"routine",     time:"14:00", duration:30, doctor:"Dr. Patel",    status:"completed",   date:"2026-02-24" },
+  { id:9,  patient:"Robert Vásquez", type:"follow-up",   time:"09:30", duration:30, doctor:"Dr. Patel",    status:"scheduled",   date:"2026-02-26" },
+  { id:10, patient:"Yuki Tanaka",    type:"routine",     time:"10:00", duration:30, doctor:"Dr. Williams", status:"scheduled",   date:"2026-02-26" },
+  { id:11, patient:"Margaret Chen",  type:"procedure",   time:"11:00", duration:60, doctor:"Dr. Patel",    status:"scheduled",   date:"2026-02-27" },
+  { id:12, patient:"Aisha Okonkwo",  type:"new-patient", time:"10:00", duration:45, doctor:"Dr. Williams", status:"scheduled",   date:"2026-03-03" },
+  { id:13, patient:"Thomas Reilly",  type:"routine",     time:"09:00", duration:30, doctor:"Dr. Patel",    status:"scheduled",   date:"2026-03-03" },
+  { id:14, patient:"Derek Marsh",    type:"follow-up",   time:"13:00", duration:30, doctor:"Dr. Williams", status:"scheduled",   date:"2026-03-05" },
 ];
 const INIT_RECALLS = [
   { id:1, patient:"Robert Vásquez", reason:"HbA1c recheck",       due:"2026-02-20", urgency:"high"   },
@@ -459,14 +467,14 @@ function MessagesPage({ user, messages, setMessages }) {
   );
 }
 
-function NewApptModal({onClose,onSave,patients}){
-  const[f,sf]=useState({pid:"",date:today(),time:"09:00",dur:"30",doc:"Dr. Patel",type:"routine",notes:""});
+function NewApptModal({onClose,onSave,patients,defaultDate}){
+  const[f,sf]=useState({pid:"",date:defaultDate||today(),time:"09:00",dur:"30",doc:"Dr. Patel",type:"routine",notes:""});
   const[ok,sok]=useState(false);
   const s=(k,v)=>sf(p=>({...p,[k]:v}));
   const sub=()=>{
     if(!f.pid)return;
     const pt=patients.find(p=>p.id===parseInt(f.pid));
-    onSave({id:Date.now(),patient:`${pt.first_name} ${pt.last_name}`,type:f.type,time:f.time,duration:parseInt(f.dur),doctor:f.doc,status:"scheduled"});
+    onSave({id:Date.now(),patient:`${pt.first_name} ${pt.last_name}`,type:f.type,time:f.time,duration:parseInt(f.dur),doctor:f.doc,status:"scheduled",date:f.date});
     sok(true);setTimeout(onClose,1400);
   };
   return(
@@ -785,40 +793,206 @@ function Dashboard({user,setPage,appts,recalls}){
   );
 }
 
-function ApptsPage({user,appts,setAppts,patients}){
-  const[filter,setFilter]=useState("all");
-  const[showNew,setShowNew]=useState(false);
-  const filtered=filter==="all"?appts:appts.filter(a=>a.status===filter);
-  const canAdd=user.role==="receptionist"||user.role==="admin";
-  const advance=(id)=>{const o=["scheduled","checked-in","in-progress","completed"];setAppts(p=>p.map(a=>{if(a.id!==id)return a;const i=o.indexOf(a.status);return{...a,status:i<o.length-1?o[i+1]:a.status};}));};
-  return(
-    <div style={{padding:"28px 32px",maxWidth:1000}}>
-      {showNew&&<NewApptModal onClose={()=>setShowNew(false)} onSave={a=>{setAppts(p=>[...p,a]);setShowNew(false);}} patients={patients}/>}
-      <div style={{marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-        <div><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Appointments</h1><p style={{color:C.muted,fontSize:14,marginTop:4}}>Wednesday, February 25, 2026</p></div>
-        {canAdd&&<button onClick={()=>setShowNew(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 18px",fontSize:13,fontWeight:600,cursor:"pointer"}}>+ New Appointment</button>}
+function MiniCalendar({ selectedDate, onSelectDate, appts }) {
+  const initDate = new Date(selectedDate + "T12:00:00");
+  const [viewYear, setViewYear] = useState(initDate.getFullYear());
+  const [viewMonth, setViewMonth] = useState(initDate.getMonth());
+  const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDOW = new Date(viewYear, viewMonth, 1).getDay();
+
+  const apptCounts = {};
+  appts.forEach(a => {
+    if (!a.date) return;
+    const [y, m, d] = a.date.split("-").map(Number);
+    if (y === viewYear && m - 1 === viewMonth) {
+      apptCounts[d] = (apptCounts[d] || 0) + 1;
+    }
+  });
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  const cells = [];
+  for (let i = 0; i < firstDOW; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  return (
+    <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "16px 14px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <button onClick={prevMonth} style={{ background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: 20, lineHeight: 1, padding: "2px 8px", borderRadius: 4 }}>‹</button>
+        <div style={{ fontWeight: 700, fontSize: 13, color: C.text }}>{MONTH_NAMES[viewMonth]} {viewYear}</div>
+        <button onClick={nextMonth} style={{ background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: 20, lineHeight: 1, padding: "2px 8px", borderRadius: 4 }}>›</button>
       </div>
-      <div style={{display:"flex",gap:6,marginBottom:16}}>
-        {[["all","All"],["scheduled","Scheduled"],["checked-in","Checked In"],["in-progress","In Progress"],["completed","Completed"]].map(([id,lbl])=>(
-          <button key={id} onClick={()=>setFilter(id)} style={{padding:"6px 14px",borderRadius:20,border:`1px solid ${filter===id?C.navyMid:C.border}`,background:filter===id?C.navyMid:C.surface,color:filter===id?"#fff":C.muted,fontSize:12,fontWeight:600,cursor:"pointer"}}>{lbl}</button>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2, marginBottom: 4 }}>
+        {["Su","Mo","Tu","We","Th","Fr","Sa"].map(d => (
+          <div key={d} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: C.muted, paddingBottom: 4 }}>{d}</div>
         ))}
       </div>
-      <Card>
-        <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{background:"#F7F9FC"}}>{["Time","Patient","Type","Doctor","Duration","Status","Action"].map(h=><th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
-          <tbody>{filtered.map((a,i)=>(
-            <tr key={a.id} style={{borderBottom:i<filtered.length-1?`1px solid ${C.border}`:"none",background:a.status==="in-progress"?"#FFFBF0":"transparent"}}>
-              <td style={{padding:"13px 16px",fontSize:13,fontWeight:700,color:C.text}}>{a.time}</td>
-              <td style={{padding:"13px 16px",fontSize:13,fontWeight:600,color:C.text}}>{a.patient}</td>
-              <td style={{padding:"13px 16px"}}><TB type={a.type}/></td>
-              <td style={{padding:"13px 16px",fontSize:13,color:C.muted}}>{a.doctor}</td>
-              <td style={{padding:"13px 16px",fontSize:13,color:C.muted}}>{a.duration}m</td>
-              <td style={{padding:"13px 16px"}}><SB status={a.status}/></td>
-              <td style={{padding:"13px 16px"}}>{a.status!=="completed"&&<button onClick={()=>advance(a.id)} style={{fontSize:11,fontWeight:600,padding:"5px 10px",borderRadius:5,border:`1px solid ${C.border}`,background:C.surface,color:C.navyMid,cursor:"pointer"}}>{a.status==="scheduled"?"Check In":a.status==="checked-in"?"Start":"Complete"}</button>}</td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </Card>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2 }}>
+        {cells.map((day, idx) => {
+          if (!day) return <div key={idx} />;
+          const padM = String(viewMonth + 1).padStart(2, "0");
+          const padD = String(day).padStart(2, "0");
+          const dateStr = `${viewYear}-${padM}-${padD}`;
+          const isSelected = dateStr === selectedDate;
+          const isToday = dateStr === todayStr;
+          const count = apptCounts[day] || 0;
+          return (
+            <button
+              key={idx}
+              onClick={() => onSelectDate(dateStr)}
+              style={{
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                height: 34, borderRadius: 6, border: "none", cursor: "pointer",
+                background: isSelected ? C.navyMid : isToday ? C.blueBg : "transparent",
+                color: isSelected ? "#fff" : isToday ? C.blue : C.text,
+                fontWeight: isSelected || isToday ? 700 : 400,
+                fontSize: 12,
+              }}
+            >
+              <span>{day}</span>
+              {count > 0 && (
+                <div style={{
+                  width: 4, height: 4, borderRadius: "50%", marginTop: 2,
+                  background: isSelected ? "rgba(255,255,255,0.75)" : C.teal,
+                }} />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ApptsPage({user,appts,setAppts,patients}){
+  const [filter, setFilter] = useState("all");
+  const [showNew, setShowNew] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("2026-02-25");
+  const canAdd = user.role === "receptionist" || user.role === "admin";
+
+  const dayAppts = appts.filter(a => (a.date || "2026-02-25") === selectedDate);
+  const filtered = filter === "all" ? dayAppts : dayAppts.filter(a => a.status === filter);
+
+  const advance = (id) => {
+    const o = ["scheduled","checked-in","in-progress","completed"];
+    setAppts(p => p.map(a => {
+      if (a.id !== id) return a;
+      const i = o.indexOf(a.status);
+      return {...a, status: i < o.length - 1 ? o[i+1] : a.status};
+    }));
+  };
+
+  const displayDate = new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+
+  return (
+    <div style={{ padding: "28px 32px" }}>
+      {showNew && (
+        <NewApptModal
+          onClose={() => setShowNew(false)}
+          onSave={a => { setAppts(p => [...p, a]); setShowNew(false); }}
+          patients={patients}
+          defaultDate={selectedDate}
+        />
+      )}
+      <div style={{ marginBottom: 24, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: C.text, margin: 0 }}>Appointments</h1>
+          <p style={{ color: C.muted, fontSize: 14, marginTop: 4 }}>{displayDate}</p>
+        </div>
+        {canAdd && (
+          <button onClick={() => setShowNew(true)}
+            style={{ background: C.navyMid, color: "#fff", border: "none", borderRadius: 7, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            + New Appointment
+          </button>
+        )}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "268px 1fr", gap: 20, alignItems: "start" }}>
+        {/* ── Left panel: calendar + day summary ── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <MiniCalendar selectedDate={selectedDate} onSelectDate={date => { setSelectedDate(date); setFilter("all"); }} appts={appts} />
+          <Card style={{ padding: "16px" }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 12 }}>Day Summary</div>
+            {[
+              ["Total",       dayAppts.length,                                              C.navyMid],
+              ["Scheduled",   dayAppts.filter(a => a.status === "scheduled").length,        C.blue   ],
+              ["Checked In",  dayAppts.filter(a => a.status === "checked-in").length,       C.teal   ],
+              ["In Progress", dayAppts.filter(a => a.status === "in-progress").length,      C.amber  ],
+              ["Completed",   dayAppts.filter(a => a.status === "completed").length,        C.green  ],
+            ].map(([label, count, color]) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: count > 0 ? color : C.muted }}>{count}</span>
+              </div>
+            ))}
+          </Card>
+        </div>
+
+        {/* ── Right panel: filter tabs + appointment list ── */}
+        <div>
+          <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+            {[["all","All"],["scheduled","Scheduled"],["checked-in","Checked In"],["in-progress","In Progress"],["completed","Completed"]].map(([id,lbl]) => (
+              <button key={id} onClick={() => setFilter(id)}
+                style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${filter===id ? C.navyMid : C.border}`, background: filter===id ? C.navyMid : C.surface, color: filter===id ? "#fff" : C.muted, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+          <Card>
+            {filtered.length === 0 ? (
+              <div style={{ padding: "48px 32px", textAlign: "center", color: C.muted }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>📅</div>
+                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>No appointments</div>
+                <div style={{ fontSize: 13 }}>
+                  {filter !== "all" ? "No appointments match this filter." : "No appointments scheduled for this day."}
+                </div>
+              </div>
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ background: "#F7F9FC" }}>
+                    {["Time","Patient","Type","Doctor","Duration","Status","Action"].map(h => (
+                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: `1px solid ${C.border}` }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((a, i) => (
+                    <tr key={a.id} style={{ borderBottom: i < filtered.length-1 ? `1px solid ${C.border}` : "none", background: a.status === "in-progress" ? "#FFFBF0" : "transparent" }}>
+                      <td style={{ padding: "13px 16px", fontSize: 13, fontWeight: 700, color: C.text }}>{a.time}</td>
+                      <td style={{ padding: "13px 16px", fontSize: 13, fontWeight: 600, color: C.text }}>{a.patient}</td>
+                      <td style={{ padding: "13px 16px" }}><TB type={a.type}/></td>
+                      <td style={{ padding: "13px 16px", fontSize: 13, color: C.muted }}>{a.doctor}</td>
+                      <td style={{ padding: "13px 16px", fontSize: 13, color: C.muted }}>{a.duration}m</td>
+                      <td style={{ padding: "13px 16px" }}><SB status={a.status}/></td>
+                      <td style={{ padding: "13px 16px" }}>
+                        {a.status !== "completed" && (
+                          <button onClick={() => advance(a.id)}
+                            style={{ fontSize: 11, fontWeight: 600, padding: "5px 10px", borderRadius: 5, border: `1px solid ${C.border}`, background: C.surface, color: C.navyMid, cursor: "pointer" }}>
+                            {a.status==="scheduled" ? "Check In" : a.status==="checked-in" ? "Start" : "Complete"}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
