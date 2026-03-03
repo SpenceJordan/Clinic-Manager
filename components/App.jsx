@@ -8,12 +8,12 @@ const DEMO_USERS = [
   { username:"receptionist", password:"Recept1234!", name:"Brianna Wells",    role:"receptionist", title:"Front Desk" },
 ];
 const INIT_PATIENTS = [
-  { id:1, first_name:"Margaret", last_name:"Chen",    dob:"1968-04-12", gender:"F", phone:"555-0142", insurance:"BlueCross",   allergies:["Penicillin","Sulfa"], lastVisit:"2026-02-10", active:true  },
-  { id:2, first_name:"Robert",   last_name:"Vásquez", dob:"1952-09-28", gender:"M", phone:"555-0198", insurance:"Medicare",     allergies:[],                    lastVisit:"2026-02-18", active:true  },
-  { id:3, first_name:"Aisha",    last_name:"Okonkwo", dob:"1991-01-03", gender:"F", phone:"555-0277", insurance:"Aetna",        allergies:["Latex"],             lastVisit:"2026-01-30", active:true  },
-  { id:4, first_name:"Derek",    last_name:"Marsh",   dob:"1985-07-19", gender:"M", phone:"555-0355", insurance:"UnitedHealth", allergies:[],                    lastVisit:"2026-02-20", active:true  },
-  { id:5, first_name:"Yuki",     last_name:"Tanaka",  dob:"1977-11-05", gender:"F", phone:"555-0401", insurance:"Cigna",        allergies:["Aspirin"],           lastVisit:"2026-02-05", active:true  },
-  { id:6, first_name:"Thomas",   last_name:"Reilly",  dob:"1945-03-22", gender:"M", phone:"555-0532", insurance:"Medicare",     allergies:["Codeine"],           lastVisit:"2026-02-22", active:false },
+  { id:1, first_name:"Margaret", last_name:"Chen",    dob:"1968-04-12", gender:"F", phone:"555-0142", insurance:"BlueCross",   allergies:["Penicillin","Sulfa"], lastVisit:"2026-02-10", active:true,  contactPref:"Call",  bestTime:"Morning",   dnc:false },
+  { id:2, first_name:"Robert",   last_name:"Vásquez", dob:"1952-09-28", gender:"M", phone:"555-0198", insurance:"Medicare",     allergies:[],                    lastVisit:"2026-02-18", active:true,  contactPref:"Call",  bestTime:"Afternoon", dnc:false },
+  { id:3, first_name:"Aisha",    last_name:"Okonkwo", dob:"1991-01-03", gender:"F", phone:"555-0277", insurance:"Aetna",        allergies:["Latex"],             lastVisit:"2026-01-30", active:true,  contactPref:"Text",  bestTime:"Either",    dnc:false },
+  { id:4, first_name:"Derek",    last_name:"Marsh",   dob:"1985-07-19", gender:"M", phone:"555-0355", insurance:"UnitedHealth", allergies:[],                    lastVisit:"2026-02-20", active:true,  contactPref:"Email", bestTime:"Morning",   dnc:false },
+  { id:5, first_name:"Yuki",     last_name:"Tanaka",  dob:"1977-11-05", gender:"F", phone:"555-0401", insurance:"Cigna",        allergies:["Aspirin"],           lastVisit:"2026-02-05", active:true,  contactPref:"Call",  bestTime:"Morning",   dnc:false },
+  { id:6, first_name:"Thomas",   last_name:"Reilly",  dob:"1945-03-22", gender:"M", phone:"555-0532", insurance:"Medicare",     allergies:["Codeine"],           lastVisit:"2026-02-22", active:false, contactPref:"Call",  bestTime:"Morning",   dnc:true  },
 ];
 const INIT_LABS = {
   1:[ { id:1, name:"Complete Blood Count (CBC)", date:"2026-02-10", abnormal:false },
@@ -65,6 +65,35 @@ const INIT_NOTES = {
 const INIT_INACTIVE_RX = {
   2:[ { id:100, med:"Glipizide", dose:"5mg", sig:"Once daily before breakfast", refills:0, date:"2025-08-01", active:false } ],
 };
+const INIT_DOCTOR_STATUS = { "Dr. Priya Patel":true, "Dr. Owen Williams":true };
+const INIT_REMINDER_LOGS = {
+  1:[{ id:1, method:"Auto-SMS", ts:"2026-02-24 08:00", outcome:"Sent", confirmed:true  }],
+  3:[{ id:1, method:"Auto-SMS", ts:"2026-02-24 08:00", outcome:"Sent", confirmed:false }],
+};
+const INIT_BLOCK_TIMES = [
+  { id:1, doctor:"Dr. Patel", date:"2026-02-25", from:"12:00", to:"13:00", reason:"Lunch" },
+];
+const INIT_WAITLIST = [
+  { id:1, patient:"Yuki Tanaka", patientId:5, doctor:"Dr. Patel", preferredTime:"Morning", reason:"Annual exam rescheduled", addedDate:"2026-02-20", status:"waiting" },
+];
+const INIT_REFILL_REQUESTS = [
+  { id:1, patientId:1, patient:"Margaret Chen",  medication:"Lisinopril 10mg",  requestedBy:"nurse",        requestedByName:"James Torres",   date:"2026-02-25", status:"pending",  approvedBy:null,       note:"" },
+  { id:2, patientId:2, patient:"Robert Vásquez", medication:"Metformin 500mg",  requestedBy:"receptionist", requestedByName:"Brianna Wells",   date:"2026-02-25", status:"approved", approvedBy:"Dr. Patel", note:"Approved — continue current dose" },
+];
+const INIT_LOGIN_HISTORY = [
+  { id:1, user:"Sandra Kim",       role:"admin",        username:"admin",        ts:"2026-02-25 08:30", status:"Success" },
+  { id:2, user:"Dr. Priya Patel",  role:"doctor",       username:"doctor",       ts:"2026-02-25 08:14", status:"Success" },
+  { id:3, user:"James Torres",     role:"nurse",        username:"nurse",        ts:"2026-02-25 08:02", status:"Success" },
+  { id:4, user:"Brianna Wells",    role:"receptionist", username:"receptionist", ts:"2026-02-25 07:45", status:"Success" },
+  { id:5, user:"Unknown user",     role:"-",            username:"jdoe",         ts:"2026-02-24 22:11", status:"Failed"  },
+  { id:6, user:"Sandra Kim",       role:"admin",        username:"admin",        ts:"2026-02-24 08:22", status:"Success" },
+];
+const INIT_FILES = {
+  1:[{ id:1, name:"CBC Results Feb 2026.pdf",     type:"Lab Report", date:"2026-02-10", size:"142 KB"  }],
+  2:[{ id:1, name:"Cardiology Referral.pdf",      type:"Referral",   date:"2026-01-20", size:"98 KB"   },
+     { id:2, name:"Echocardiogram Report.pdf",    type:"Lab Report", date:"2026-01-22", size:"2.1 MB"  }],
+  6:[{ id:1, name:"Advance Directive.pdf",        type:"Legal",      date:"2025-11-05", size:"215 KB"  }],
+};
 const INIT_SETTINGS = {
   clinicName:"My Medical Clinic", address:"123 Main St, Springfield, IL 62701", phone:"(555) 000-0000",
   defaultDuration:30,
@@ -101,10 +130,10 @@ const INIT_MESSAGES = {
 };
 
 const PERMS = {
-  admin:        { appointments:true,  patients:true,  vitals:true,  notes:true,  prescriptions:true,  recalls:true, admin:true,  settings:true,  messages:true, flow:true, reports:true  },
-  doctor:       { appointments:true,  patients:true,  vitals:true,  notes:true,  prescriptions:true,  recalls:true, admin:false, settings:true,  messages:true, flow:true, reports:false },
-  nurse:        { appointments:true,  patients:true,  vitals:true,  notes:false, prescriptions:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false },
-  receptionist: { appointments:true,  patients:true,  vitals:false, notes:false, prescriptions:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false },
+  admin:        { appointments:true,  patients:true,  vitals:true,  notes:true,  prescriptions:true,  viewRx:true,  writeRx:true,  viewNotes:true,  writeNotes:true,  recalls:true, admin:true,  settings:true,  messages:true, flow:true, reports:true,  refills:true,  refillApprove:true  },
+  doctor:       { appointments:true,  patients:true,  vitals:true,  notes:true,  prescriptions:true,  viewRx:true,  writeRx:true,  viewNotes:true,  writeNotes:true,  recalls:true, admin:false, settings:true,  messages:true, flow:true, reports:false, refills:true,  refillApprove:true  },
+  nurse:        { appointments:true,  patients:true,  vitals:true,  notes:false, prescriptions:false, viewRx:true,  writeRx:false, viewNotes:true,  writeNotes:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false, refills:true,  refillApprove:false },
+  receptionist: { appointments:true,  patients:true,  vitals:false, notes:false, prescriptions:false, viewRx:false, writeRx:false, viewNotes:false, writeNotes:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false, refills:true,  refillApprove:false },
 };
 const C = {
   bg:"#F0F2F5", surface:"#FFFFFF", border:"#E2E6EB",
@@ -129,7 +158,7 @@ const Badge=({color="blue",children})=>{
   const[bg,fg]=m[color]||m.blue;
   return <span style={{background:bg,color:fg,fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:4,letterSpacing:"0.04em",textTransform:"uppercase",whiteSpace:"nowrap"}}>{children}</span>;
 };
-const SB=({status})=>{const m={"checked-in":["teal","Checked In"],"in-progress":["amber","In Progress"],scheduled:["blue","Scheduled"],completed:["green","Completed"],"no-show":["red","No Show"]};const[c,l]=m[status]||["blue",status];return <Badge color={c}>{l}</Badge>;};
+const SB=({status})=>{const m={"checked-in":["teal","Checked In"],"in-progress":["amber","With Doctor"],"with-nurse":["purple","With Nurse"],scheduled:["blue","Scheduled"],completed:["green","Completed"],"no-show":["red","No Show"]};const[c,l]=m[status]||["blue",status];return <Badge color={c}>{l}</Badge>;};
 const TB=({type})=>{const m={routine:"blue","follow-up":"teal",urgent:"red",procedure:"amber","new-patient":"green"};return <Badge color={m[type]||"blue"}>{type.replace(/-/g," ")}</Badge>;};
 const Card=({children,style={}})=><div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:10,...style}}>{children}</div>;
 const Locked=({msg})=>(
@@ -488,12 +517,14 @@ function MessagesPage({ user, messages, setMessages }) {
   );
 }
 
-function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime}){
-  const[f,sf]=useState({pid:"",date:defaultDate||today(),time:prefillTime||"09:00",dur:"30",doc:"Dr. Patel",type:"routine",notes:""});
+function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime,blockTimes=[],prefill={}}){
+  const[f,sf]=useState({pid:prefill.pid||"",date:prefill.date||defaultDate||today(),time:prefillTime||"09:00",dur:"30",doc:prefill.doc||"Dr. Patel",type:prefill.type||"routine",notes:prefill.notes||""});
   const[ok,sok]=useState(false);
   const[conflict,setConflict]=useState(null);
   const[forceOk,setForceOk]=useState(false);
-  const s=(k,v)=>{sf(p=>({...p,[k]:v}));setConflict(null);setForceOk(false);};
+  const[dirty,setDirty]=useState(false);
+  const s=(k,v)=>{sf(p=>({...p,[k]:v}));setConflict(null);setForceOk(false);setDirty(true);};
+  const handleClose=()=>{if(dirty&&!window.confirm("You have unsaved changes. Are you sure?"))return;onClose();};
   const checkConflict=()=>{
     const [sh,sm]=f.time.split(":").map(Number);
     const startMin=sh*60+sm;const endMin=startMin+parseInt(f.dur);
@@ -504,6 +535,21 @@ function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime}
       return startMin<aEnd&&endMin>aStart;
     });
   };
+  // Double-booking: same patient same date
+  const doubleBook=f.pid?appts.find(a=>{
+    const pt=patients.find(p=>p.id===parseInt(f.pid));
+    if(!pt)return false;
+    return a.date===f.date&&a.patient===`${pt.first_name} ${pt.last_name}`&&a.status!=="no-show"&&a.status!=="completed";
+  }):null;
+  // Block time check
+  const blockedSlot=(blockTimes||[]).find(b=>{
+    if(b.doctor!==f.doc&&b.doctor!=="Dr. Patel"&&b.doctor!=="All")return false;
+    if(b.date!==f.date)return false;
+    const[sh,sm]=f.time.split(":").map(Number);const start=sh*60+sm;const end=start+parseInt(f.dur);
+    const[bh,bm]=b.from.split(":").map(Number);const bStart=bh*60+bm;
+    const[eh,em]=b.to.split(":").map(Number);const bEnd=eh*60+em;
+    return start<bEnd&&end>bStart;
+  });
   const sub=()=>{
     if(!f.pid)return;
     if(!forceOk){const c=checkConflict();if(c){setConflict(c);return;}}
@@ -512,14 +558,16 @@ function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime}
     sok(true);setTimeout(onClose,1400);
   };
   return(
-    <Modal title="New Appointment" onClose={onClose}>
+    <Modal title="New Appointment" onClose={handleClose}>
       {ok&&<OK msg="Appointment scheduled!"/>}
       <FR cols={1}><FF label="Patient *"><select value={f.pid} onChange={e=>s("pid",e.target.value)} style={SS}><option value="">Select a patient…</option>{patients.map(p=><option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></FF></FR>
+      {doubleBook&&<div style={{background:"#FFFBF0",border:`1px solid #F5C07A`,borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:12,color:C.amber}}><strong>Note:</strong> {doubleBook.patient} already has an appointment at {doubleBook.time} with {doubleBook.doctor} on this date.</div>}
       <FR><FF label="Date"><input type="date" value={f.date} onChange={e=>s("date",e.target.value)} style={IS}/></FF><FF label="Time"><input type="time" value={f.time} onChange={e=>s("time",e.target.value)} style={IS}/></FF></FR>
       <FR>
         <FF label="Doctor"><select value={f.doc} onChange={e=>s("doc",e.target.value)} style={SS}><option>Dr. Patel</option><option>Dr. Williams</option></select></FF>
         <FF label="Duration"><select value={f.dur} onChange={e=>s("dur",e.target.value)} style={SS}><option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option><option value="60">60 min</option></select></FF>
       </FR>
+      {blockedSlot&&<div style={{background:C.amberBg,border:`1px solid #F5C07A`,borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:12,color:C.amber}}>⚠ <strong>{blockedSlot.reason}</strong> block for {blockedSlot.doctor} {blockedSlot.from}–{blockedSlot.to}. You can still book.</div>}
       <FR cols={1}><FF label="Appointment Type"><select value={f.type} onChange={e=>s("type",e.target.value)} style={SS}><option value="routine">Routine</option><option value="follow-up">Follow-up</option><option value="urgent">Urgent</option><option value="new-patient">New Patient</option><option value="procedure">Procedure</option></select></FF></FR>
       <FR cols={1}><FF label="Notes (optional)"><textarea value={f.notes} onChange={e=>s("notes",e.target.value)} rows={3} placeholder="Reason for visit or special instructions…" style={{...IS,resize:"vertical"}}/></FF></FR>
       {conflict&&!forceOk&&(
@@ -529,7 +577,7 @@ function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime}
           <button onClick={()=>setForceOk(true)} style={{fontSize:12,fontWeight:700,color:C.amber,background:"none",border:`1px solid ${C.amber}`,borderRadius:6,padding:"5px 12px",cursor:"pointer"}}>Book Anyway</button>
         </div>
       )}
-      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={onClose}>Cancel</XB><PB onClick={sub} disabled={!f.pid||ok}>Schedule Appointment</PB></div>
+      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={handleClose}>Cancel</XB><PB onClick={sub} disabled={!f.pid||ok}>Schedule Appointment</PB></div>
     </Modal>
   );
 }
@@ -537,14 +585,16 @@ function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime}
 function NewPatientModal({onClose,onSave}){
   const[f,sf]=useState({fn:"",ln:"",dob:"",gender:"",phone:"",email:"",address:"",ins:"",ins_id:"",ec_name:"",ec_phone:"",allergies:""});
   const[ok,sok]=useState(false);
-  const s=(k,v)=>sf(p=>({...p,[k]:v}));
+  const[dirty,setDirty]=useState(false);
+  const s=(k,v)=>{sf(p=>({...p,[k]:v}));setDirty(true);};
+  const handleClose=()=>{if(dirty&&!window.confirm("You have unsaved changes. Are you sure?"))return;onClose();};
   const sub=()=>{
     if(!f.fn||!f.ln||!f.dob)return;
     onSave({id:Date.now(),first_name:f.fn,last_name:f.ln,dob:f.dob,gender:f.gender,phone:f.phone,insurance:f.ins,allergies:f.allergies?f.allergies.split(",").map(a=>a.trim()).filter(Boolean):[],lastVisit:today()});
     sok(true);setTimeout(onClose,1400);
   };
   return(
-    <Modal title="New Patient Registration" onClose={onClose} width={640}>
+    <Modal title="New Patient Registration" onClose={handleClose} width={640}>
       {ok&&<OK msg="Patient registered successfully!"/>}
       <div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:12}}>Personal Information</div>
       <FR><FF label="First Name *"><input value={f.fn} onChange={e=>s("fn",e.target.value)} style={IS} placeholder="Jane"/></FF><FF label="Last Name *"><input value={f.ln} onChange={e=>s("ln",e.target.value)} style={IS} placeholder="Doe"/></FF></FR>
@@ -557,7 +607,7 @@ function NewPatientModal({onClose,onSave}){
       <FR><FF label="Name"><input value={f.ec_name} onChange={e=>s("ec_name",e.target.value)} style={IS}/></FF><FF label="Phone"><input value={f.ec_phone} onChange={e=>s("ec_phone",e.target.value)} style={IS}/></FF></FR>
       <div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em",margin:"20px 0 12px"}}>Clinical</div>
       <FR cols={1}><FF label="Known Allergies (comma-separated)"><input value={f.allergies} onChange={e=>s("allergies",e.target.value)} style={IS} placeholder="Penicillin, Sulfa, Latex…"/></FF></FR>
-      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={onClose}>Cancel</XB><PB onClick={sub} disabled={!f.fn||!f.ln||!f.dob||ok}>Register Patient</PB></div>
+      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={handleClose}>Cancel</XB><PB onClick={sub} disabled={!f.fn||!f.ln||!f.dob||ok}>Register Patient</PB></div>
     </Modal>
   );
 }
@@ -589,38 +639,74 @@ function VitalsModal({patient,onClose,onSave}){
   );
 }
 
+function calcDaysSupply(qty,sig){
+  const qtyNum=parseInt((qty||"").replace(/\D/g,""));
+  if(!qtyNum||!sig)return null;
+  const s=sig.toLowerCase();
+  let perDay=null;
+  if(/four\s*times|qid|4\s*times/.test(s))perDay=4;
+  else if(/three\s*times|tid|3\s*times/.test(s))perDay=3;
+  else if(/twice|bid|two\s*times|2\s*times/.test(s))perDay=2;
+  else if(/every\s*6/.test(s))perDay=4;
+  else if(/every\s*8/.test(s))perDay=3;
+  else if(/every\s*12/.test(s))perDay=2;
+  else if(/once|daily|qd|od|every\s*day|1\s*time/.test(s))perDay=1;
+  else if(/weekly|once\s*a?\s*week/.test(s))perDay=1/7;
+  if(!perDay)return null;
+  return Math.round(qtyNum/perDay);
+}
+
 function RxModal({patient,onClose,onSave}){
   const[f,sf]=useState({med:"",dose:"",sig:"",qty:"",refills:"0",notes:""});
   const[ok,sok]=useState(false);
-  const s=(k,v)=>sf(p=>({...p,[k]:v}));
+  const[dirty,setDirty]=useState(false);
+  const s=(k,v)=>{sf(p=>({...p,[k]:v}));setDirty(true);};
+  const handleClose=()=>{if(dirty&&!window.confirm("You have unsaved changes. Are you sure?"))return;onClose();};
   const drugs=["Amoxicillin","Metformin","Lisinopril","Atorvastatin","Omeprazole","Levothyroxine","Amlodipine","Metoprolol","Gabapentin","Sertraline"];
+  const daysSupply=calcDaysSupply(f.qty,f.sig);
   const sub=()=>{
     if(!f.med||!f.dose)return;
-    onSave(patient.id,{id:Date.now(),med:f.med,dose:f.dose,sig:f.sig,refills:parseInt(f.refills),date:today()});
+    onSave(patient.id,{id:Date.now(),med:f.med,dose:f.dose,sig:f.sig,qty:f.qty,refills:parseInt(f.refills),date:today()});
     sok(true);setTimeout(onClose,1400);
   };
   return(
-    <Modal title={`New Prescription — ${patient.first_name} ${patient.last_name}`} onClose={onClose} width={560}>
+    <Modal title={`New Prescription — ${patient.first_name} ${patient.last_name}`} onClose={handleClose} width={560}>
       {ok&&<OK msg="Prescription saved!"/>}
       {patient.allergies.length>0&&<div style={{background:C.redBg,border:`1px solid #F5B7B1`,borderRadius:8,padding:"10px 14px",marginBottom:16,display:"flex",gap:10,alignItems:"center"}}><span>⚠</span><span style={{color:C.red,fontSize:13,fontWeight:600}}>Allergies on file: {patient.allergies.join(", ")}</span></div>}
       <FR cols={1}><FF label="Medication Name *"><input value={f.med} onChange={e=>s("med",e.target.value)} style={IS} placeholder="Start typing or pick below…" list="dl"/><datalist id="dl">{drugs.map(d=><option key={d} value={d}/>)}</datalist></FF></FR>
       <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:16}}>{drugs.slice(0,6).map(d=><button key={d} onClick={()=>s("med",d)} style={{fontSize:11,padding:"4px 10px",borderRadius:5,border:`1px solid ${C.border}`,background:f.med===d?C.blueBg:C.bg,color:f.med===d?C.blue:C.muted,cursor:"pointer",fontWeight:600}}>{d}</button>)}</div>
       <FR><FF label="Dose *"><input value={f.dose} onChange={e=>s("dose",e.target.value)} style={IS} placeholder="500mg"/></FF><FF label="Quantity"><input value={f.qty} onChange={e=>s("qty",e.target.value)} style={IS} placeholder="30 tablets"/></FF></FR>
-      <FR cols={1}><FF label="Instructions"><input value={f.sig} onChange={e=>s("sig",e.target.value)} style={IS} placeholder="Take once daily with food…"/></FF></FR>
+      <FR cols={1}><FF label="Instructions (sig)"><input value={f.sig} onChange={e=>s("sig",e.target.value)} style={IS} placeholder="Take once daily with food…"/></FF></FR>
+      {daysSupply!==null&&<div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:6,padding:"8px 14px",marginBottom:14,fontSize:12,color:C.muted}}>≈ <strong>{daysSupply} days supply</strong></div>}
       <FR cols={1}><FF label="Refills"><select value={f.refills} onChange={e=>s("refills",e.target.value)} style={SS}>{[0,1,2,3,5,11].map(n=><option key={n} value={n}>{n} refill{n!==1?"s":""}</option>)}</select></FF></FR>
       <FR cols={1}><FF label="Notes"><textarea value={f.notes} onChange={e=>s("notes",e.target.value)} rows={2} style={{...IS,resize:"vertical"}} placeholder="Additional instructions…"/></FF></FR>
-      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={onClose}>Cancel</XB><PB onClick={sub} disabled={!f.med||!f.dose||ok}>Save Prescription</PB></div>
+      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={handleClose}>Cancel</XB><PB onClick={sub} disabled={!f.med||!f.dose||ok}>Save Prescription</PB></div>
     </Modal>
   );
 }
 
-function NoteModal({patient,onClose,onSave}){
-  const[f,sf]=useState({chief:"",subj:"",obj:"",assess:"",plan:"",sign:false});
+function NoteModal({patient,onClose,onSave,user,draftNotes,setDraftNotes}){
+  const draft=(draftNotes||{})[patient.id]||{};
+  const[f,sf]=useState({chief:draft.chief||"",subj:draft.subj||"",obj:draft.obj||"",assess:draft.assess||"",plan:draft.plan||"",sign:false});
   const[ok,sok]=useState(false);
-  const s=(k,v)=>sf(p=>({...p,[k]:v}));
+  const[medsConfirmed,setMedsConfirmed]=useState(false);
+  const[medsTs,setMedsTs]=useState(null);
+  const[dirty,setDirty]=useState(false);
+  const s=(k,v)=>{sf(p=>({...p,[k]:v}));setDirty(true);};
+  const handleClose=()=>{
+    if(dirty&&!window.confirm("You have unsaved changes. Are you sure?"))return;
+    // Save draft on close without signing
+    if(dirty&&setDraftNotes){setDraftNotes(p=>({...p,[patient.id]:{chief:f.chief,subj:f.subj,obj:f.obj,assess:f.assess,plan:f.plan}}));}
+    onClose();
+  };
+  const confirmMeds=()=>{setMedsConfirmed(true);setMedsTs(nowTime());};
   const sub=()=>{
     if(!f.chief||!f.assess)return;
-    onSave(patient.id,{id:Date.now(),date:today(),doctor:"Dr. Patel",chief:f.chief,assessment:f.assess,plan:f.plan,signed:f.sign});
+    const doctorName=user?.name||"Dr. Patel";
+    const noteObj={id:Date.now(),date:today(),doctor:doctorName,chief:f.chief,assessment:f.assess,plan:f.plan,signed:f.sign};
+    if(medsConfirmed)noteObj.medsReconciled={by:doctorName,at:medsTs};
+    onSave(patient.id,noteObj);
+    if(setDraftNotes)setDraftNotes(p=>{const n={...p};delete n[patient.id];return n;});
     sok(true);setTimeout(onClose,1500);
   };
   const soap=[
@@ -630,8 +716,18 @@ function NoteModal({patient,onClose,onSave}){
     {key:"plan",label:"P — Plan",         hint:"What happens next",         ph:"Treatment, referrals, follow-up…"},
   ];
   return(
-    <Modal title={`Visit Note — ${patient.first_name} ${patient.last_name}`} onClose={onClose} width={680}>
+    <Modal title={`Visit Note — ${patient.first_name} ${patient.last_name}`} onClose={handleClose} width={680}>
       {ok&&<OK msg={f.sign?"Note signed and locked!":"Note saved as draft!"}/>}
+      {!medsConfirmed?(
+        <div style={{background:C.amberBg,border:`1px solid #F5C07A`,borderRadius:8,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:16}}>💊</span>
+          <div style={{flex:1}}><div style={{fontWeight:700,fontSize:13,color:C.amber}}>Please confirm patient medications are up to date before proceeding</div></div>
+          <button onClick={confirmMeds} style={{fontSize:12,fontWeight:700,color:C.amber,background:"none",border:`1px solid ${C.amber}`,borderRadius:6,padding:"6px 14px",cursor:"pointer",whiteSpace:"nowrap"}}>Medications Confirmed ✓</button>
+        </div>
+      ):(
+        <div style={{fontSize:12,color:C.muted,marginBottom:12}}>✓ Meds reconciled at {medsTs} by {user?.name||"Doctor"}</div>
+      )}
+      {draft.chief&&<div style={{background:C.blueBg,border:`1px solid #C5D8F8`,borderRadius:6,padding:"8px 12px",marginBottom:12,fontSize:12,color:C.navyMid}}>📝 Draft restored from previous session</div>}
       <FR cols={1}><FF label="Chief Complaint *"><input value={f.chief} onChange={e=>s("chief",e.target.value)} style={IS} placeholder="e.g. Follow-up for hypertension, chest pain x 2 days…"/></FF></FR>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:16}}>
         {soap.map(sec=>(
@@ -654,7 +750,7 @@ function NoteModal({patient,onClose,onSave}){
         </label>
       </div>
       <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}>
-        <XB onClick={onClose}>Cancel</XB>
+        <XB onClick={handleClose}>Cancel</XB>
         <button onClick={sub} disabled={!f.chief||!f.assess||ok}
           style={{background:f.sign?(ok?"#9BB5D9":C.amber):(ok?"#9BB5D9":C.navyMid),color:"#fff",border:"none",borderRadius:8,padding:"10px 22px",fontSize:14,fontWeight:700,cursor:"pointer"}}>
           {f.sign?"Sign &amp; Lock":"Save Draft"}
@@ -688,7 +784,7 @@ function RecallModal({onClose,onSave,patients}){
   );
 }
 
-function Sidebar({page,setPage,user,recallCount,unreadMsgCount}){
+function Sidebar({page,setPage,user,recallCount,unreadMsgCount,pendingRefills,collapsed,setCollapsed}){
   const p=PERMS[user.role];const rc=RC[user.role];
   const nav=[
     {id:"dashboard",  icon:"▦", label:"Dashboard",    show:true},
@@ -697,41 +793,47 @@ function Sidebar({page,setPage,user,recallCount,unreadMsgCount}){
     {id:"patients",   icon:"◉", label:"Patients",     show:p.patients},
     {id:"recalls",    icon:"◎", label:"Recalls",      show:p.recalls,   badge:recallCount},
     {id:"messages",   icon:"✉", label:"Messages",     show:p.messages,  badge:unreadMsgCount},
+    {id:"refills",    icon:"♻", label:"Refill Queue", show:p.refills,   badge:p.refillApprove?pendingRefills:0},
     {id:"reports",    icon:"▣", label:"Reports",      show:p.reports},
     {id:"admin",      icon:"⚙", label:"Admin Panel",  show:p.admin},
     {id:"settings",   icon:"≡", label:"Settings",     show:p.settings},
   ].filter(n=>n.show);
+  const W=collapsed?56:220;
   return(
-    <div style={{width:220,background:C.navy,display:"flex",flexDirection:"column",height:"100%",flexShrink:0}}>
-      <div style={{padding:"20px 18px 16px",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:32,height:32,background:"#E8F0FE",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",color:C.navyMid,fontWeight:900,fontSize:17}}>✚</div>
-          <div><div style={{color:"#fff",fontWeight:700,fontSize:13}}>Clinic Manager</div><div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>v1.0</div></div>
-        </div>
+    <div style={{width:W,background:C.navy,display:"flex",flexDirection:"column",height:"100%",flexShrink:0,transition:"width 0.2s"}}>
+      <div style={{padding:collapsed?"16px 12px":"20px 18px 16px",borderBottom:"1px solid rgba(255,255,255,0.08)",display:"flex",alignItems:"center",gap:10,overflow:"hidden"}}>
+        <div style={{width:32,height:32,background:"#E8F0FE",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",color:C.navyMid,fontWeight:900,fontSize:17,flexShrink:0}}>✚</div>
+        {!collapsed&&<div><div style={{color:"#fff",fontWeight:700,fontSize:13}}>Clinic Manager</div><div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>v1.0</div></div>}
       </div>
-      <div style={{padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+      {!collapsed&&<div style={{padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
         <div style={{background:rc.bg,borderRadius:6,padding:"5px 10px",display:"inline-flex",alignItems:"center",gap:6}}>
           <span style={{fontSize:12}}>{RI[user.role]}</span>
           <span style={{color:rc.fg,fontSize:11,fontWeight:700,textTransform:"capitalize"}}>{user.role}</span>
         </div>
-      </div>
+      </div>}
       <nav style={{flex:1,padding:"10px"}}>
         {nav.map(n=>{const a=page===n.id;return(
-          <button key={n.id} onClick={()=>setPage(n.id)}
-            style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"9px 12px",borderRadius:7,border:"none",cursor:"pointer",marginBottom:2,background:a?"rgba(255,255,255,0.12)":"transparent",color:a?"#fff":"rgba(255,255,255,0.55)",fontSize:13,fontWeight:a?600:400,textAlign:"left"}}>
-            <span style={{fontSize:14}}>{n.icon}</span>
-            <span style={{flex:1}}>{n.label}</span>
-            {n.badge>0&&<span style={{background:n.id==="messages"?C.teal:C.red,color:"#fff",fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:10}}>{n.badge}</span>}
+          <button key={n.id} onClick={()=>setPage(n.id)} title={collapsed?n.label:undefined}
+            style={{display:"flex",alignItems:"center",gap:collapsed?0:10,width:"100%",padding:collapsed?"9px 0":"9px 12px",justifyContent:collapsed?"center":"flex-start",borderRadius:7,border:"none",cursor:"pointer",marginBottom:2,background:a?"rgba(255,255,255,0.12)":"transparent",color:a?"#fff":"rgba(255,255,255,0.55)",fontSize:13,fontWeight:a?600:400,textAlign:"left",position:"relative"}}>
+            <span style={{fontSize:14,flexShrink:0}}>{n.icon}</span>
+            {!collapsed&&<span style={{flex:1}}>{n.label}</span>}
+            {n.badge>0&&<span style={{background:n.id==="messages"?C.teal:n.id==="refills"?C.green:C.red,color:"#fff",fontSize:10,fontWeight:700,padding:"1px 6px",borderRadius:10,position:collapsed?"absolute":"static",top:collapsed?4:undefined,right:collapsed?4:undefined}}>{n.badge}</span>}
           </button>
         );})}
       </nav>
-      <div style={{padding:"14px 16px",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+      {!collapsed&&<div style={{padding:"14px 16px",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:32,height:32,borderRadius:"50%",background:rc.fg,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:13,flexShrink:0}}>
             {user.name.split(" ").filter(w=>!w.startsWith("Dr")).map(w=>w[0]).join("").slice(0,2)}
           </div>
           <div><div style={{color:"#fff",fontSize:12,fontWeight:600}}>{user.name}</div><div style={{color:"rgba(255,255,255,0.4)",fontSize:11}}>{user.title}</div></div>
         </div>
+      </div>}
+      <div style={{padding:"10px",borderTop:"1px solid rgba(255,255,255,0.08)",display:"flex",justifyContent:collapsed?"center":"flex-end"}}>
+        <button onClick={()=>setCollapsed(v=>!v)} title={collapsed?"Expand sidebar":"Collapse sidebar"}
+          style={{background:"rgba(255,255,255,0.08)",border:"none",color:"rgba(255,255,255,0.5)",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:12,fontWeight:700}}>
+          {collapsed?"⟩":"⟨"}
+        </button>
       </div>
     </div>
   );
@@ -777,7 +879,7 @@ function UpcomingWidget({appts}){
   );
 }
 
-function Dashboard({user,setPage,appts,recalls}){
+function Dashboard({user,setPage,appts,recalls,refillRequests}){
   const r=user.role;
   const TODAY="2026-02-25";
   const todayAppts=appts.filter(a=>(a.date||TODAY)===TODAY);
@@ -824,8 +926,8 @@ function Dashboard({user,setPage,appts,recalls}){
     <div style={{padding:"28px 32px",maxWidth:1100}}>
       <div style={{marginBottom:24}}><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Good morning, {user.name}</h1><p style={{color:C.muted,fontSize:14,marginTop:4}}>Wednesday, February 25, 2026 · {todayAppts.filter(a=>a.doctor==="Dr. Patel").length} patients today</p></div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:16}}>
-        {[["My Patients",todayAppts.filter(a=>a.doctor==="Dr. Patel").length,"Today",C.navyMid],["In Progress",inProg.length,"With you now",C.amber],["No-Shows",noShows.length,"Today",C.red],["Overdue Recalls",overdue.length,"",C.amber]].map(([l,v,s,c])=>(
-          <Card key={l} style={{padding:"18px 20px"}}><div style={{color:C.muted,fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6}}>{l}</div><div style={{fontSize:30,fontWeight:800,color:c,lineHeight:1}}>{v}</div><div style={{color:C.muted,fontSize:12,marginTop:5}}>{s}</div></Card>
+        {[["My Patients",todayAppts.filter(a=>a.doctor==="Dr. Patel").length,"Today",C.navyMid],["In Progress",inProg.length,"With you now",C.amber],["No-Shows",noShows.length,"Today",C.red],["Pending Refills",(refillRequests||[]).filter(r=>r.status==="pending").length,"Awaiting review",C.teal]].map(([l,v,s,c])=>(
+          <Card key={l} style={{padding:"18px 20px",cursor:l==="Pending Refills"?"pointer":undefined}} onClick={l==="Pending Refills"?()=>setPage("refills"):undefined}><div style={{color:C.muted,fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6}}>{l}</div><div style={{fontSize:30,fontWeight:800,color:c,lineHeight:1}}>{v}</div><div style={{color:C.muted,fontSize:12,marginTop:5}}>{s}</div></Card>
         ))}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:16,marginBottom:16}}>
@@ -854,7 +956,7 @@ function Dashboard({user,setPage,appts,recalls}){
     <div style={{padding:"28px 32px",maxWidth:1100}}>
       <div style={{marginBottom:24}}><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Good morning, {user.name}</h1><p style={{color:C.muted,fontSize:14,marginTop:4}}>Wednesday, February 25, 2026 · Admin Overview</p></div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:16}}>
-        {[["Total Patients","6","Active records",C.navyMid],["Today's Volume",todayAppts.length,"Appointments",C.blue],["No-Shows",noShows.length,"Today",C.red],["Open Recalls",recalls.length,"",C.amber]].map(([l,v,s,c])=>(
+        {[["Total Patients","6","Active records",C.navyMid],["Today's Volume",todayAppts.length,"Appointments",C.blue],["Pending Refills",(refillRequests||[]).filter(r=>r.status==="pending").length,"Awaiting approval",C.teal],["Open Recalls",recalls.length,"Follow-up needed",C.amber]].map(([l,v,s,c])=>(
           <Card key={l} style={{padding:"18px 20px"}}><div style={{color:C.muted,fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6}}>{l}</div><div style={{fontSize:30,fontWeight:800,color:c,lineHeight:1}}>{v}</div><div style={{color:C.muted,fontSize:12,marginTop:5}}>{s}</div></Card>
         ))}
       </div>
@@ -1088,28 +1190,115 @@ function ReportsPage({appts,recalls,patients}){
   );
 }
 
+// ─── FILES POPUP MODAL ────────────────────────────────────────────────────────
+function FilesPopupModal({files,patientName,onClose,onContinue}){
+  return(
+    <Modal title={`Files — ${patientName}`} onClose={onClose} width={560}>
+      <div style={{marginBottom:16,fontSize:13,color:C.muted}}>Review patient files before starting the visit.</div>
+      {files.length===0?<div style={{textAlign:"center",padding:"32px",color:C.muted}}>No files on record.</div>:(
+        <div style={{border:`1px solid ${C.border}`,borderRadius:8,overflow:"hidden",marginBottom:20}}>
+          {files.map((f,i)=>(
+            <div key={f.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",borderBottom:i<files.length-1?`1px solid ${C.border}`:"none"}}>
+              <span style={{fontSize:20}}>📄</span>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:600,fontSize:13,color:C.text}}>{f.name}</div>
+                <div style={{fontSize:11,color:C.muted}}>{f.type} · {f.date} · {f.size}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}>
+        <XB onClick={onClose}>Close</XB>
+        <PB onClick={onContinue}>Continue to Visit</PB>
+      </div>
+    </Modal>
+  );
+}
+
 // ─── PATIENT FLOW BOARD ───────────────────────────────────────────────────────
-function PatientFlowPage({user,appts,setAppts}){
+function PatientFlowPage({user,appts,setAppts,doctorStatus,setDoctorStatus,patients,showToast,recalls,setRecalls,noShowHandler,completeHandler,setPendingFollowUp,pendingFollowUp}){
   const TODAY="2026-02-25";
   const todayAppts=appts.filter(a=>(a.date||TODAY)===TODAY);
   const COLS=[
-    {id:"scheduled",  label:"Scheduled",           color:C.blue,    bg:C.blueBg},
-    {id:"checked-in", label:"Checked In",           color:C.teal,    bg:"#E0F4F6"},
-    {id:"in-progress",label:"With Provider",        color:C.amber,   bg:C.amberBg},
-    {id:"completed",  label:"Done",                 color:C.green,   bg:C.greenBg},
+    {id:"scheduled",   label:"Scheduled",  color:C.blue,   bg:C.blueBg},
+    {id:"checked-in",  label:"Checked In", color:C.teal,   bg:"#E0F4F6"},
+    {id:"with-nurse",  label:"With Nurse", color:C.purple, bg:C.purpleBg},
+    {id:"in-progress", label:"With Doctor",color:C.amber,  bg:C.amberBg},
+    {id:"completed",   label:"Done",       color:C.green,  bg:C.greenBg},
   ];
   const noShows=appts.filter(a=>(a.date||TODAY)===TODAY&&a.status==="no-show");
-  const ORDER=["scheduled","checked-in","in-progress","completed"];
-  const advance=(id)=>setAppts(p=>p.map(a=>{if(a.id!==id)return a;const i=ORDER.indexOf(a.status);return{...a,status:i<ORDER.length-1?ORDER[i+1]:a.status};}));
-  const setNoShow=(id)=>setAppts(p=>p.map(a=>a.id===id?{...a,status:"no-show"}:a));
+  const ORDER=["scheduled","checked-in","with-nurse","in-progress","completed"];
+  const BTN_LABEL={"scheduled":"Check In →","checked-in":"To Nurse →","with-nurse":"Start Visit →","in-progress":"Complete ✓"};
+  const [filesAppt,setFilesAppt]=useState(null);
+  const prevInProgressRef=useRef(new Set(todayAppts.filter(a=>a.status==="in-progress").map(a=>a.id)));
+  const[doctorAlerts,setDoctorAlerts]=useState([]);
+  useEffect(()=>{
+    const currIds=new Set(todayAppts.filter(a=>a.status==="in-progress").map(a=>a.id));
+    const newAlerts=[];
+    for(const id of currIds){if(!prevInProgressRef.current.has(id)){const a=todayAppts.find(x=>x.id===id);if(a)newAlerts.push(a);}}
+    if(newAlerts.length>0)setDoctorAlerts(prev=>[...prev,...newAlerts]);
+    prevInProgressRef.current=currIds;
+  },[todayAppts]);
+  const dismissAlert=(id)=>setDoctorAlerts(prev=>prev.filter(a=>a.id!==id));
+  const advance=(id)=>{
+    const a=appts.find(x=>x.id===id);if(!a)return;
+    const i=ORDER.indexOf(a.status);
+    if(i<0||i>=ORDER.length-1)return;
+    const nextStatus=ORDER[i+1];
+    // Show files popup when moving to "with-nurse" or "in-progress"
+    if((nextStatus==="with-nurse"||nextStatus==="in-progress")&&INIT_FILES[findPatientId(a.patient)]){
+      setFilesAppt({id,nextStatus,patient:a.patient,patientId:findPatientId(a.patient)});return;
+    }
+    if(nextStatus==="completed"){completeHandler(id);}
+    else{setAppts(p=>p.map(x=>x.id===id?{...x,status:nextStatus}:x));}
+  };
+  const findPatientId=(name)=>{
+    const p=patients.find(pt=>`${pt.first_name} ${pt.last_name}`===name);return p?p.id:null;
+  };
   const TYPE_C={routine:C.blue,"follow-up":C.teal,urgent:C.red,procedure:C.amber,"new-patient":C.green};
+  const DOCTORS=Object.keys(doctorStatus||{});
   return(
     <div style={{padding:"28px 32px",height:"calc(100% - 56px)",boxSizing:"border-box",display:"flex",flexDirection:"column"}}>
+      {doctorAlerts.length>0&&(
+        <div style={{position:"fixed",top:72,right:20,zIndex:800,display:"flex",flexDirection:"column",gap:8}}>
+          {doctorAlerts.map(a=>(
+            <div key={a.id} style={{background:C.surface,border:`2px solid ${C.amber}`,borderRadius:12,padding:"14px 16px",boxShadow:"0 6px 24px rgba(0,0,0,0.18)",minWidth:260,maxWidth:300,animation:"slideIn 0.2s ease"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:18}}>🔔</span>
+                  <div style={{fontWeight:700,fontSize:13,color:C.amber}}>Patient Ready for Doctor</div>
+                </div>
+                <button onClick={()=>dismissAlert(a.id)} style={{background:"none",border:"none",color:C.muted,fontSize:20,cursor:"pointer",padding:0,lineHeight:1,marginLeft:8}}>×</button>
+              </div>
+              <div style={{fontWeight:700,fontSize:15,color:C.text,marginBottom:3}}>{a.patient}</div>
+              <div style={{fontSize:12,color:C.muted}}>{a.type.replace(/-/g," ")} · {a.time}</div>
+              {a.doctor&&<div style={{fontSize:12,color:C.muted,marginTop:1}}>{a.doctor}</div>}
+              <button onClick={()=>dismissAlert(a.id)} style={{marginTop:10,width:"100%",padding:"6px",borderRadius:6,border:`1px solid ${C.border}`,background:C.bg,color:C.muted,fontSize:12,fontWeight:600,cursor:"pointer"}}>Dismiss</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {filesAppt&&<FilesPopupModal files={INIT_FILES[filesAppt.patientId]||[]} patientName={filesAppt.patient} onClose={()=>setFilesAppt(null)} onContinue={()=>{
+        const a=appts.find(x=>x.id===filesAppt.id);
+        if(filesAppt.nextStatus==="completed"){completeHandler(filesAppt.id);}
+        else{setAppts(p=>p.map(x=>x.id===filesAppt.id?{...x,status:filesAppt.nextStatus}:x));}
+        setFilesAppt(null);
+      }}/>}
       <div style={{marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
         <div><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Patient Flow</h1><p style={{color:C.muted,fontSize:14,marginTop:4}}>Wednesday, February 25, 2026 · {todayAppts.length} patients scheduled</p></div>
-        {noShows.length>0&&<div style={{background:C.redBg,border:`1px solid #F5B7B1`,borderRadius:8,padding:"8px 14px",fontSize:13,color:C.red,fontWeight:600}}>{noShows.length} no-show{noShows.length>1?"s":""} today</div>}
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          {DOCTORS.length>0&&<div style={{display:"flex",gap:6}}>
+            {DOCTORS.map(doc=>(
+              <div key={doc} style={{background:doctorStatus[doc]?C.greenBg:C.redBg,border:`1px solid ${doctorStatus[doc]?C.green:C.red}20`,borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700,color:doctorStatus[doc]?C.green:C.red,display:"flex",alignItems:"center",gap:4}}>
+                <span style={{fontSize:8}}>●</span>{doc.split(" ").pop()} {doctorStatus[doc]?"Ready":"Busy"}
+              </div>
+            ))}
+          </div>}
+          {noShows.length>0&&<div style={{background:C.redBg,border:`1px solid #F5B7B1`,borderRadius:8,padding:"8px 14px",fontSize:13,color:C.red,fontWeight:600}}>{noShows.length} no-show{noShows.length>1?"s":""} today</div>}
+        </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,flex:1,overflow:"hidden"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:12,flex:1,overflow:"hidden"}}>
         {COLS.map(col=>{
           const cards=todayAppts.filter(a=>a.status===col.id);
           return(
@@ -1119,7 +1308,7 @@ function PatientFlowPage({user,appts,setAppts}){
                 <div style={{fontWeight:700,fontSize:13,color:col.color}}>{col.label}</div>
                 <div style={{marginLeft:"auto",background:col.color,color:"#fff",fontSize:11,fontWeight:700,padding:"1px 7px",borderRadius:10}}>{cards.length}</div>
               </div>
-              <div style={{flex:1,overflowY:"auto",padding:"10px 10px 10px"}}>
+              <div style={{flex:1,overflowY:"auto",padding:"10px"}}>
                 {cards.length===0&&<div style={{color:col.color,opacity:0.5,fontSize:12,textAlign:"center",paddingTop:20}}>No patients</div>}
                 {cards.map(a=>(
                   <div key={a.id} style={{background:C.surface,borderRadius:8,padding:"12px",marginBottom:8,border:`1px solid ${col.color}25`,boxShadow:"0 1px 3px rgba(0,0,0,0.06)"}}>
@@ -1132,8 +1321,8 @@ function PatientFlowPage({user,appts,setAppts}){
                       <span style={{fontSize:10,color:C.muted,background:C.bg,padding:"2px 6px",borderRadius:3}}>{a.doctor}</span>
                     </div>
                     <div style={{display:"flex",gap:6}}>
-                      {col.id!=="completed"&&<button onClick={()=>advance(a.id)} style={{flex:1,fontSize:11,fontWeight:700,padding:"5px 8px",borderRadius:5,border:"none",background:col.color,color:"#fff",cursor:"pointer"}}>{col.id==="scheduled"?"Check In →":col.id==="checked-in"?"Start Visit →":"Complete ✓"}</button>}
-                      {col.id==="scheduled"&&user.role!=="doctor"&&<button onClick={()=>setNoShow(a.id)} style={{fontSize:11,fontWeight:600,padding:"5px 8px",borderRadius:5,border:`1px solid ${C.border}`,background:C.surface,color:C.muted,cursor:"pointer"}}>No Show</button>}
+                      {col.id!=="completed"&&<button onClick={()=>advance(a.id)} style={{flex:1,fontSize:11,fontWeight:700,padding:"5px 8px",borderRadius:5,border:"none",background:col.color,color:"#fff",cursor:"pointer"}}>{BTN_LABEL[col.id]||"→"}</button>}
+                      {col.id==="scheduled"&&user.role!=="doctor"&&<button onClick={()=>noShowHandler(a.id)} style={{fontSize:11,fontWeight:600,padding:"5px 8px",borderRadius:5,border:`1px solid ${C.border}`,background:C.surface,color:C.red,cursor:"pointer"}}>No Show</button>}
                     </div>
                   </div>
                 ))}
@@ -1227,34 +1416,73 @@ function MiniCalendar({ selectedDate, onSelectDate, appts }) {
   );
 }
 
-function ApptsPage({user,appts,setAppts,patients,settings}){
+function ApptsPage({user,appts,setAppts,patients,settings,reminderLogs,setReminderLogs,waitlist,setWaitlist,blockTimes,recalls,setRecalls,showToast,noShowHandler,completeHandler,pendingFollowUp,setPendingFollowUp}){
   const [filter, setFilter] = useState("all");
   const [showNew, setShowNew] = useState(false);
   const [selectedDate, setSelectedDate] = useState("2026-02-25");
-  const [view, setView] = useState("list"); // list | day | week
+  const [view, setView] = useState("list");
   const [prefillTime, setPrefillTime] = useState(null);
+  const [expandedReminder, setExpandedReminder] = useState(null);
+  const [phoneLogText, setPhoneLogText] = useState("");
+  const [cancelWaitlistAppt, setCancelWaitlistAppt] = useState(null);
   const canAdd = user.role === "receptionist" || user.role === "admin";
+  const canLog = user.role === "receptionist" || user.role === "admin";
 
   const dayAppts = appts.filter(a => (a.date || "2026-02-25") === selectedDate);
   const filtered = filter === "all" ? dayAppts : dayAppts.filter(a => a.status === filter);
 
-  const ORDER = ["scheduled","checked-in","in-progress","completed"];
-  const advance = (id) => setAppts(p => p.map(a => {
-    if (a.id !== id) return a;
+  const ORDER = ["scheduled","checked-in","with-nurse","in-progress","completed"];
+  const BTN_LABEL = {"scheduled":"Check In","checked-in":"To Nurse","with-nurse":"Start","in-progress":"Complete"};
+  const advance = (id) => {
+    const a = appts.find(x=>x.id===id); if(!a) return;
     const i = ORDER.indexOf(a.status);
-    return {...a, status: i < ORDER.length-1 ? ORDER[i+1] : a.status};
-  }));
-  const setNoShow = (id) => setAppts(p => p.map(a => a.id === id ? {...a, status:"no-show"} : a));
-
-  const displayDate = new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
-
-  const openSlotModal = (date, time) => {
-    setSelectedDate(date);
-    setPrefillTime(time);
-    setShowNew(true);
+    if(i<0||i>=ORDER.length-1) return;
+    const next = ORDER[i+1];
+    if(next==="completed") { completeHandler(id); }
+    else setAppts(p=>p.map(x=>x.id===id?{...x,status:next}:x));
   };
+
+  const cancelAppt = (id) => {
+    const a = appts.find(x=>x.id===id); if(!a) return;
+    const wl = (waitlist||[]).filter(w=>w.doctor===a.doctor&&w.status==="waiting");
+    if(wl.length>0) { setCancelWaitlistAppt({appt:a,waitlist:wl}); }
+    else { setAppts(p=>p.map(x=>x.id===id?{...x,status:"no-show"}:x)); }
+  };
+
+  const getReminderDot = (id) => {
+    const logs = (reminderLogs||{})[id]||[];
+    if(!logs.length) return {color:"#CBD5E1",label:"Not Sent"};
+    const last = logs[0];
+    if(last.confirmed) return {color:C.green,label:"Confirmed"};
+    return {color:C.amber,label:"Sent — Not Confirmed"};
+  };
+
+  const logPhoneCall = (apptId) => {
+    if(!phoneLogText.trim()) return;
+    const entry={id:Date.now(),method:"Phone",ts:new Date().toLocaleString(),outcome:phoneLogText.trim(),confirmed:false};
+    setReminderLogs(p=>({...p,[apptId]:[entry,...(p[apptId]||[])]}));
+    setPhoneLogText("");
+    showToast&&showToast("Phone call logged");
+  };
+
+  const printDaySchedule = () => {
+    const grouped = {};
+    dayAppts.forEach(a=>{if(!grouped[a.doctor])grouped[a.doctor]=[];grouped[a.doctor].push(a);});
+    const clinicName = (settings||{}).clinicName||"Clinic Manager";
+    const rows = Object.entries(grouped).map(([doc,apts])=>`
+      <h3 style="margin:16px 0 8px;font-size:14px;">${doc}</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">
+        <tr style="background:#f0f2f5;"><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Time</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Patient</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Type</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Dur.</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Notes</th></tr>
+        ${apts.map(a=>`<tr><td style="padding:6px 10px;border:1px solid #ddd;">${a.time}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.patient}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.type.replace(/-/g," ")}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.duration}m</td><td style="padding:6px 10px;border:1px solid #ddd;min-width:120px;"></td></tr>`).join("")}
+      </table>`).join("");
+    const w=window.open("","_blank");
+    w.document.write(`<!DOCTYPE html><html><head><title>Daily Schedule</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#000;}h1{font-size:18px;margin-bottom:4px;}@media print{button{display:none;}}</style></head><body><h1>${clinicName} — Daily Schedule</h1><p style="margin:0 0 16px;font-size:13px;">${new Date(selectedDate+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>${rows}<button onclick="window.print()" style="padding:8px 16px;margin-top:8px;">Print</button></body></html>`);
+    w.document.close();
+    setTimeout(()=>w.print(),400);
+  };
+
+  const displayDate = new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const openSlotModal = (date, time) => { setSelectedDate(date); setPrefillTime(time); setShowNew(true); };
 
   return (
     <div style={{ padding: "28px 32px" }}>
@@ -1262,12 +1490,29 @@ function ApptsPage({user,appts,setAppts,patients,settings}){
         <NewApptModal
           onClose={() => { setShowNew(false); setPrefillTime(null); }}
           onSave={a => { setAppts(p => [...p, a]); setShowNew(false); setPrefillTime(null); }}
-          patients={patients}
-          defaultDate={selectedDate}
-          appts={appts}
-          prefillTime={prefillTime}
+          patients={patients} defaultDate={selectedDate} appts={appts} prefillTime={prefillTime} blockTimes={blockTimes||[]}
         />
       )}
+      {cancelWaitlistAppt&&(
+        <Modal title="Patient on Waitlist" onClose={()=>setCancelWaitlistAppt(null)}>
+          <p style={{fontSize:13,color:C.text,marginBottom:16}}>There {cancelWaitlistAppt.waitlist.length===1?"is":"are"} <strong>{cancelWaitlistAppt.waitlist.length}</strong> patient{cancelWaitlistAppt.waitlist.length!==1?"s":""} on the waitlist for {cancelWaitlistAppt.appt.doctor}.</p>
+          {cancelWaitlistAppt.waitlist.slice(0,1).map(w=>(
+            <div key={w.id} style={{background:C.bg,borderRadius:8,padding:"12px 14px",marginBottom:16}}>
+              <div style={{fontWeight:700,fontSize:13}}>{w.patient}</div>
+              <div style={{fontSize:12,color:C.muted}}>Preferred: {w.preferredTime} · {w.reason}</div>
+            </div>
+          ))}
+          <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+            <XB onClick={()=>{setAppts(p=>p.map(x=>x.id===cancelWaitlistAppt.appt.id?{...x,status:"no-show"}:x));setCancelWaitlistAppt(null);}}>Cancel Appointment Only</XB>
+            <PB onClick={()=>{
+              setAppts(p=>p.map(x=>x.id===cancelWaitlistAppt.appt.id?{...x,status:"no-show"}:x));
+              setWaitlist(p=>p.map(w=>w.id===cancelWaitlistAppt.waitlist[0].id?{...w,status:"contacted"}:w));
+              setCancelWaitlistAppt(null);showToast&&showToast("Waitlist patient marked contacted");
+            }}>Mark as Contacted &amp; Book</PB>
+          </div>
+        </Modal>
+      )}
+
       <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: C.text, margin: 0 }}>Appointments</h1>
@@ -1275,13 +1520,14 @@ function ApptsPage({user,appts,setAppts,patients,settings}){
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <div style={{ display: "flex", border: `1px solid ${C.border}`, borderRadius: 7, overflow: "hidden" }}>
-            {[["list","≡ List"],["day","⊟ Day"],["week","⊞ Week"]].map(([id,lbl]) => (
+            {[["list","≡ List"],["day","⊟ Day"],["week","⊞ Week"],["waitlist","⏳ Waitlist"]].map(([id,lbl]) => (
               <button key={id} onClick={() => setView(id)}
                 style={{ padding: "7px 14px", border: "none", background: view===id ? C.navyMid : C.surface, color: view===id ? "#fff" : C.muted, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                 {lbl}
               </button>
             ))}
           </div>
+          {canAdd && <button onClick={printDaySchedule} style={{background:C.surface,color:C.muted,border:`1px solid ${C.border}`,borderRadius:7,padding:"9px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>🖨 Print Day</button>}
           {canAdd && (
             <button onClick={() => setShowNew(true)}
               style={{ background: C.navyMid, color: "#fff", border: "none", borderRadius: 7, padding: "9px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
@@ -1292,33 +1538,27 @@ function ApptsPage({user,appts,setAppts,patients,settings}){
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "268px 1fr", gap: 20, alignItems: "start" }}>
-        {/* ── Left panel: calendar + day summary ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <MiniCalendar selectedDate={selectedDate} onSelectDate={date => { setSelectedDate(date); setFilter("all"); }} appts={appts} />
           <Card style={{ padding: "16px" }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 12 }}>Day Summary</div>
-            {[
-              ["Total",       dayAppts.length,                                                  C.navyMid],
-              ["Scheduled",   dayAppts.filter(a => a.status === "scheduled").length,            C.blue   ],
-              ["Checked In",  dayAppts.filter(a => a.status === "checked-in").length,           C.teal   ],
-              ["In Progress", dayAppts.filter(a => a.status === "in-progress").length,          C.amber  ],
-              ["Completed",   dayAppts.filter(a => a.status === "completed").length,            C.green  ],
-              ["No-Shows",    dayAppts.filter(a => a.status === "no-show").length,              C.red    ],
-            ].map(([label, count, color]) => (
-              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ fontSize: 12, color: C.muted }}>{label}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: count > 0 ? color : C.muted }}>{count}</span>
+            {[["Total",dayAppts.length,C.navyMid],["Scheduled",dayAppts.filter(a=>a.status==="scheduled").length,C.blue],["Checked In",dayAppts.filter(a=>a.status==="checked-in").length,C.teal],["With Nurse",dayAppts.filter(a=>a.status==="with-nurse").length,C.purple],["With Doctor",dayAppts.filter(a=>a.status==="in-progress").length,C.amber],["Completed",dayAppts.filter(a=>a.status==="completed").length,C.green],["No-Shows",dayAppts.filter(a=>a.status==="no-show").length,C.red]].map(([label,count,color])=>(
+              <div key={label} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <span style={{fontSize:12,color:C.muted}}>{label}</span>
+                <span style={{fontSize:13,fontWeight:700,color:count>0?color:C.muted}}>{count}</span>
               </div>
             ))}
           </Card>
         </div>
 
-        {/* ── Right panel ── */}
         <div>
+          {view === "waitlist" && (
+            <WaitlistPanel waitlist={waitlist||[]} setWaitlist={setWaitlist} patients={patients} canAdd={canAdd||user.role==="nurse"}/>
+          )}
           {view === "list" && (
             <>
-              <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-                {[["all","All"],["scheduled","Scheduled"],["checked-in","Checked In"],["in-progress","In Progress"],["completed","Completed"],["no-show","No-Show"]].map(([id,lbl]) => (
+              <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap:"wrap" }}>
+                {[["all","All"],["scheduled","Scheduled"],["checked-in","Checked In"],["with-nurse","With Nurse"],["in-progress","With Doctor"],["completed","Completed"],["no-show","No-Show"]].map(([id,lbl]) => (
                   <button key={id} onClick={() => setFilter(id)}
                     style={{ padding: "6px 14px", borderRadius: 20, border: `1px solid ${filter===id ? C.navyMid : C.border}`, background: filter===id ? C.navyMid : C.surface, color: filter===id ? "#fff" : C.muted, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                     {lbl}
@@ -1336,38 +1576,73 @@ function ApptsPage({user,appts,setAppts,patients,settings}){
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr style={{ background: "#F7F9FC" }}>
-                        {["Time","Patient","Type","Doctor","Duration","Status","Action"].map(h => (
-                          <th key={h} style={{ padding: "10px 16px", textAlign: "left", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: `1px solid ${C.border}` }}>{h}</th>
+                        {["Time","Patient","Type","Doctor","Dur.","Status","Reminder","Action"].map(h => (
+                          <th key={h} style={{ padding: "10px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: `1px solid ${C.border}` }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((a, i) => (
-                        <tr key={a.id} style={{ borderBottom: i < filtered.length-1 ? `1px solid ${C.border}` : "none", background: a.status==="in-progress" ? "#FFFBF0" : a.status==="no-show" ? C.redBg : "transparent" }}>
-                          <td style={{ padding: "13px 16px", fontSize: 13, fontWeight: 700, color: C.text }}>{a.time}</td>
-                          <td style={{ padding: "13px 16px", fontSize: 13, fontWeight: 600, color: C.text }}>{a.patient}</td>
-                          <td style={{ padding: "13px 16px" }}><TB type={a.type}/></td>
-                          <td style={{ padding: "13px 16px", fontSize: 13, color: C.muted }}>{a.doctor}</td>
-                          <td style={{ padding: "13px 16px", fontSize: 13, color: C.muted }}>{a.duration}m</td>
-                          <td style={{ padding: "13px 16px" }}><SB status={a.status}/></td>
-                          <td style={{ padding: "13px 16px" }}>
-                            <div style={{ display: "flex", gap: 6 }}>
-                              {a.status !== "completed" && a.status !== "no-show" && (
-                                <button onClick={() => advance(a.id)}
-                                  style={{ fontSize: 11, fontWeight: 600, padding: "5px 10px", borderRadius: 5, border: `1px solid ${C.border}`, background: C.surface, color: C.navyMid, cursor: "pointer" }}>
-                                  {a.status==="scheduled" ? "Check In" : a.status==="checked-in" ? "Start" : "Complete"}
-                                </button>
-                              )}
-                              {a.status === "scheduled" && (
-                                <button onClick={() => setNoShow(a.id)}
-                                  style={{ fontSize: 11, fontWeight: 600, padding: "5px 10px", borderRadius: 5, border: `1px solid ${C.border}`, background: C.surface, color: C.red, cursor: "pointer" }}>
-                                  No Show
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {filtered.map((a, i) => {
+                        const dot = getReminderDot(a.id);
+                        const logs = (reminderLogs||{})[a.id]||[];
+                        const isExpanded = expandedReminder===a.id;
+                        return [
+                          <tr key={a.id} style={{ borderBottom: `1px solid ${C.border}`, background: a.status==="in-progress"||a.status==="with-nurse" ? "#FFFBF0" : a.status==="no-show" ? C.redBg : "transparent" }}>
+                            <td style={{ padding: "12px 12px", fontSize: 13, fontWeight: 700, color: C.text }}>{a.time}</td>
+                            <td style={{ padding: "12px 12px", fontSize: 13, fontWeight: 600, color: C.text }}>{a.patient}</td>
+                            <td style={{ padding: "12px 12px" }}><TB type={a.type}/></td>
+                            <td style={{ padding: "12px 12px", fontSize: 12, color: C.muted }}>{a.doctor}</td>
+                            <td style={{ padding: "12px 12px", fontSize: 12, color: C.muted }}>{a.duration}m</td>
+                            <td style={{ padding: "12px 12px" }}><SB status={a.status}/></td>
+                            <td style={{ padding: "12px 12px" }}>
+                              <button onClick={()=>setExpandedReminder(isExpanded?null:a.id)} title={dot.label}
+                                style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:5,padding:0}}>
+                                <span style={{width:10,height:10,borderRadius:"50%",background:dot.color,display:"inline-block",flexShrink:0}}/>
+                                <span style={{fontSize:11,color:C.muted}}>{dot.label}</span>
+                              </button>
+                            </td>
+                            <td style={{ padding: "12px 12px" }}>
+                              <div style={{ display: "flex", gap: 5 }}>
+                                {a.status !== "completed" && a.status !== "no-show" && (
+                                  <button onClick={() => advance(a.id)}
+                                    style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 5, border: `1px solid ${C.border}`, background: C.surface, color: C.navyMid, cursor: "pointer" }}>
+                                    {BTN_LABEL[a.status]||"→"}
+                                  </button>
+                                )}
+                                {a.status === "scheduled" && (
+                                  <button onClick={() => noShowHandler(a.id)}
+                                    style={{ fontSize: 11, fontWeight: 600, padding: "4px 8px", borderRadius: 5, border: `1px solid ${C.border}`, background: C.surface, color: C.red, cursor: "pointer" }}>
+                                    No Show
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>,
+                          isExpanded && (
+                            <tr key={a.id+"-log"}>
+                              <td colSpan={8} style={{padding:"0 12px 12px",background:C.bg}}>
+                                <div style={{padding:"12px",background:C.surface,borderRadius:8,border:`1px solid ${C.border}`}}>
+                                  <div style={{fontWeight:700,fontSize:12,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:8}}>Reminder Log</div>
+                                  {logs.length===0?<div style={{fontSize:12,color:C.muted,marginBottom:8}}>No reminders logged yet.</div>:logs.map((lg,li)=>(
+                                    <div key={lg.id} style={{display:"flex",gap:12,alignItems:"center",marginBottom:6,fontSize:12}}>
+                                      <span style={{color:C.muted,minWidth:130}}>{lg.ts}</span>
+                                      <span style={{background:C.bg,borderRadius:4,padding:"1px 6px",fontWeight:600}}>{lg.method}</span>
+                                      <span style={{color:C.text,flex:1}}>{lg.outcome}</span>
+                                      {lg.confirmed&&<Badge color="green">Confirmed</Badge>}
+                                    </div>
+                                  ))}
+                                  {canLog&&(
+                                    <div style={{display:"flex",gap:8,marginTop:8}}>
+                                      <input value={phoneLogText} onChange={e=>setPhoneLogText(e.target.value)} placeholder="Log outcome…" style={{...IS,flex:1,fontSize:12,padding:"6px 10px"}}/>
+                                      <button onClick={()=>logPhoneCall(a.id)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:6,padding:"6px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>Log Phone Call</button>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        ].filter(Boolean);
+                      })}
                     </tbody>
                   </table>
                 )}
@@ -1382,15 +1657,59 @@ function ApptsPage({user,appts,setAppts,patients,settings}){
   );
 }
 
-function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,setNotes,recalls,setRecalls,patients,setPatients}){
+function WaitlistPanel({waitlist,setWaitlist,patients,canAdd}){
+  const[f,sf]=useState({pid:"",doctor:"Dr. Patel",preferredTime:"Morning",reason:""});
+  const[loading,setLoading]=useState(true);
+  useEffect(()=>{const t=setTimeout(()=>setLoading(false),600);return()=>clearTimeout(t);},[]);
+  const add=()=>{
+    if(!f.pid||!f.reason)return;
+    const pt=patients.find(p=>p.id===parseInt(f.pid));
+    if(!pt)return;
+    setWaitlist(p=>[...p,{id:Date.now(),patient:`${pt.first_name} ${pt.last_name}`,patientId:pt.id,doctor:f.doctor,preferredTime:f.preferredTime,reason:f.reason,addedDate:today(),status:"waiting"}]);
+    sf({pid:"",doctor:"Dr. Patel",preferredTime:"Morning",reason:""});
+  };
+  const markContacted=(id)=>setWaitlist(p=>p.map(w=>w.id===id?{...w,status:"contacted"}:w));
+  if(loading)return <div style={{padding:32}}>{[1,2,3].map(i=><div key={i} style={{background:"#E8ECF0",borderRadius:8,height:56,marginBottom:8}}/>)}</div>;
+  return(
+    <div>
+      {canAdd&&<Card style={{marginBottom:16,padding:"16px 20px"}}>
+        <div style={{fontWeight:700,fontSize:14,color:C.text,marginBottom:14}}>Add to Waitlist</div>
+        <FR><FF label="Patient"><select value={f.pid} onChange={e=>sf(p=>({...p,pid:e.target.value}))} style={SS}><option value="">Select patient…</option>{patients.map(pt=><option key={pt.id} value={pt.id}>{pt.first_name} {pt.last_name}</option>)}</select></FF><FF label="Doctor"><select value={f.doctor} onChange={e=>sf(p=>({...p,doctor:e.target.value}))} style={SS}><option>Dr. Patel</option><option>Dr. Williams</option></select></FF></FR>
+        <FR><FF label="Preferred Time"><select value={f.preferredTime} onChange={e=>sf(p=>({...p,preferredTime:e.target.value}))} style={SS}><option>Morning</option><option>Afternoon</option><option>Either</option></select></FF><FF label="Reason"><input value={f.reason} onChange={e=>sf(p=>({...p,reason:e.target.value}))} style={IS} placeholder="Reason for visit…"/></FF></FR>
+        <PB onClick={add} disabled={!f.pid||!f.reason}>Add to Waitlist</PB>
+      </Card>}
+      <Card>
+        {waitlist.length===0?<div style={{padding:"40px 24px",textAlign:"center",color:C.muted}}>Waitlist is empty.</div>:(
+          waitlist.map((w,i)=>(
+            <div key={w.id} style={{padding:"14px 20px",borderBottom:i<waitlist.length-1?`1px solid ${C.border}`:"none",display:"flex",alignItems:"center",gap:14}}>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:700,fontSize:13,color:C.text}}>{w.patient}</div>
+                <div style={{fontSize:12,color:C.muted}}>{w.doctor} · {w.preferredTime} · {w.reason}</div>
+                <div style={{fontSize:11,color:C.muted,marginTop:2}}>Added {w.addedDate}</div>
+              </div>
+              <Badge color={w.status==="contacted"?"green":"blue"}>{w.status==="contacted"?"Contacted":"Waiting"}</Badge>
+              {w.status==="waiting"&&<button onClick={()=>markContacted(w.id)} style={{fontSize:11,fontWeight:600,padding:"5px 10px",borderRadius:5,border:`1px solid ${C.border}`,background:C.surface,color:C.navyMid,cursor:"pointer"}}>Mark Contacted</button>}
+            </div>
+          ))
+        )}
+      </Card>
+    </div>
+  );
+}
+
+function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,setNotes,recalls,setRecalls,patients,setPatients,refillRequests,setRefillRequests,draftNotes,setDraftNotes,onOpenPatient}){
   const[tab,setTab]=useState("overview");
   const[sv,setSv]=useState(false);const[sr,setSr]=useState(false);const[sn,setSn]=useState(false);const[sc,setSc]=useState(false);
   const[showInactiveRx,setShowInactiveRx]=useState(false);
   const[addingAllergy,setAddingAllergy]=useState(false);const[newAllergy,setNewAllergy]=useState("");
   const[labResults,setLabResults]=useState(INIT_LABS[patient.id]||[]);
+  const[editContactPref,setEditContactPref]=useState(false);
   const p=PERMS[user.role];const v=vitals[patient.id];const rxs=rx[patient.id]||[];const ptN=notes[patient.id]||[];
   const inactiveRxs=INIT_INACTIVE_RX[patient.id]||[];
-  const tabs=[{id:"overview",show:true},{id:"vitals",show:p.vitals},{id:"prescriptions",show:p.prescriptions},{id:"notes",show:p.notes},{id:"labs",show:true},{id:"files",show:true},{id:"recalls",show:p.recalls}].filter(t=>t.show);
+  const patFiles=INIT_FILES[patient.id]||[];
+  const showRxTab=p.prescriptions||p.viewRx;const canWriteRx=p.writeRx||p.prescriptions;
+  const showNotesTab=p.notes||p.viewNotes;const canWriteNotes=p.writeNotes||p.notes;
+  const tabs=[{id:"overview",show:true},{id:"vitals",show:p.vitals},{id:"prescriptions",show:showRxTab},{id:"notes",show:showNotesTab},{id:"labs",show:true},{id:"files",show:true},{id:"recalls",show:p.recalls}].filter(t=>t.show);
   const addAllergy=()=>{
     if(!newAllergy.trim())return;
     setPatients(prev=>prev.map(pt=>pt.id===patient.id?{...pt,allergies:[...pt.allergies,newAllergy.trim()]}:pt));
@@ -1424,7 +1743,7 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
     <div style={{padding:"28px 32px"}}>
       {sv&&<VitalsModal patient={patient} onClose={()=>setSv(false)} onSave={(pid,data)=>{setVitals(p=>({...p,[pid]:data}));setSv(false);}}/>}
       {sr&&<RxModal patient={patient} onClose={()=>setSr(false)} onSave={(pid,r)=>{setRx(p=>({...p,[pid]:[...(p[pid]||[]),r]}));setSr(false);}}/>}
-      {sn&&<NoteModal patient={patient} onClose={()=>setSn(false)} onSave={(pid,n)=>{setNotes(p=>({...p,[pid]:[...(p[pid]||[]),n]}));setSn(false);}}/>}
+      {sn&&<NoteModal patient={patient} user={user} draftNotes={draftNotes} setDraftNotes={setDraftNotes} onClose={()=>setSn(false)} onSave={(pid,n)=>{setNotes(p=>({...p,[pid]:[...(p[pid]||[]),n]}));setSn(false);}}/>}
       {sc&&<RecallModal onClose={()=>setSc(false)} onSave={r=>{setRecalls(p=>[...p,r]);setSc(false);}} patients={patients}/>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <button onClick={onBack} style={{background:"none",border:"none",color:C.muted,fontSize:13,cursor:"pointer",padding:0}}>← Back to Patients</button>
@@ -1436,7 +1755,20 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
       <Card style={{padding:"20px 24px",marginBottom:20}}>
         <div style={{display:"flex",alignItems:"center",gap:20}}>
           <div style={{width:52,height:52,borderRadius:"50%",background:C.navyMid,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:700,flexShrink:0}}>{patient.first_name[0]}{patient.last_name[0]}</div>
-          <div style={{flex:1}}><h2 style={{margin:0,fontSize:20,fontWeight:700,color:C.text}}>{patient.first_name} {patient.last_name}</h2><div style={{color:C.muted,fontSize:13,marginTop:3}}>{age(patient.dob)} yrs · {patient.gender==="F"?"Female":"Male"} · DOB {fmt(patient.dob)} · {patient.phone}</div></div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
+              <h2 style={{margin:0,fontSize:20,fontWeight:700,color:C.text}}>{patient.first_name} {patient.last_name}</h2>
+              {patient.dnc&&<span style={{background:C.redBg,color:C.red,fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:4,border:`1px solid #F5B7B1`}}>⛔ DNC</span>}
+            </div>
+            <div style={{color:C.muted,fontSize:13,marginTop:2}}>{age(patient.dob)} yrs · {patient.gender==="F"?"Female":"Male"} · DOB {fmt(patient.dob)} · {patient.phone}</div>
+            {patient.dnc?(
+              <div style={{background:C.redBg,border:`1px solid #F5B7B1`,borderRadius:5,padding:"4px 10px",marginTop:6,display:"inline-flex",alignItems:"center",gap:6,fontSize:12,color:C.red,fontWeight:700}}>⛔ Do Not Contact</div>
+            ):(
+              <div style={{fontSize:12,color:C.muted,marginTop:4}}>
+                📞 Preferred: <strong>{patient.contactPref||"Call"}</strong> · Best time: <strong>{patient.bestTime||"Morning"}</strong>
+              </div>
+            )}
+          </div>
           <div>
             {patient.allergies.length>0?(<div style={{background:C.redBg,border:`1px solid #F5B7B1`,borderRadius:7,padding:"8px 14px",marginBottom:4}}><div style={{color:C.red,fontSize:11,fontWeight:700,textTransform:"uppercase",marginBottom:2}}>⚠ Allergies</div><div style={{color:C.red,fontSize:12,fontWeight:600}}>{patient.allergies.join(", ")}</div></div>):(<div style={{background:C.greenBg,border:`1px solid #A7D9B5`,borderRadius:7,padding:"8px 14px",marginBottom:4}}><div style={{color:C.green,fontSize:12,fontWeight:600}}>✓ No Known Allergies</div></div>)}
             {(p.vitals||user.role==="doctor")&&<button onClick={()=>setAddingAllergy(true)} style={{fontSize:11,color:C.navyMid,fontWeight:600,background:"none",border:"none",cursor:"pointer",padding:0}}>+ Add Allergy</button>}
@@ -1461,8 +1793,31 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
             {p.vitals?(v?(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>{[["Blood Pressure",v.bp,"mmHg"],["Heart Rate",v.hr,"bpm"],["Temperature",v.temp,"°F"],["O₂ Sat",v.o2,"%"],["Weight",v.weight,"lbs"],["BMI",v.bmi,""]].map(([l,val,u])=><div key={l} style={{background:C.bg,borderRadius:7,padding:"10px 12px"}}><div style={{fontSize:11,color:C.muted,fontWeight:600,textTransform:"uppercase"}}>{l}</div><div style={{fontSize:17,fontWeight:700,color:C.text,marginTop:2}}>{val}<span style={{fontSize:11,color:C.muted,fontWeight:400,marginLeft:2}}>{u}</span></div></div>)}</div>):<div style={{color:C.muted,fontSize:13}}>No vitals yet. <button onClick={()=>setSv(true)} style={{color:C.navyMid,fontWeight:600,background:"none",border:"none",cursor:"pointer",textDecoration:"underline"}}>Record now</button></div>):<div style={{color:C.muted,fontSize:13,fontStyle:"italic"}}>🔒 Nurses and doctors only.</div>}
           </Card>
           <Card style={{padding:"18px 20px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><div style={{fontWeight:700,fontSize:13,color:C.text}}>Active Medications</div>{user.role==="doctor"&&<button onClick={()=>setSr(true)} style={{fontSize:11,color:C.navyMid,fontWeight:600,background:"none",border:`1px solid ${C.border}`,borderRadius:5,padding:"4px 10px",cursor:"pointer"}}>+ Prescribe</button>}</div>
-            {p.prescriptions?(rxs.length>0?rxs.map(rx=><div key={rx.id} style={{padding:"10px 12px",background:C.bg,borderRadius:7,marginBottom:8}}><div style={{fontWeight:600,fontSize:13,color:C.text}}>{rx.med} <span style={{color:C.muted,fontWeight:400}}>{rx.dose}</span></div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{rx.sig} · {rx.refills} refills</div></div>):<div style={{color:C.muted,fontSize:13}}>No active medications.</div>):<div style={{color:C.muted,fontSize:13,fontStyle:"italic"}}>🔒 Doctors only.</div>}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><div style={{fontWeight:700,fontSize:13,color:C.text}}>Active Medications</div>{canWriteRx&&<button onClick={()=>setSr(true)} style={{fontSize:11,color:C.navyMid,fontWeight:600,background:"none",border:`1px solid ${C.border}`,borderRadius:5,padding:"4px 10px",cursor:"pointer"}}>+ Prescribe</button>}</div>
+            {showRxTab?(rxs.length>0?rxs.map(r=><div key={r.id} style={{padding:"10px 12px",background:C.bg,borderRadius:7,marginBottom:8}}><div style={{fontWeight:600,fontSize:13,color:C.text}}>{r.med} <span style={{color:C.muted,fontWeight:400}}>{r.dose}</span></div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{r.sig} · {r.refills} refills</div></div>):<div style={{color:C.muted,fontSize:13}}>No active medications.</div>):<div style={{color:C.muted,fontSize:13,fontStyle:"italic"}}>🔒 Doctors only.</div>}
+          </Card>
+          <Card style={{padding:"18px 20px",gridColumn:"1 / -1"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <div style={{fontWeight:700,fontSize:13,color:C.text}}>Contact Preferences</div>
+              <div style={{display:"flex",gap:8}}>
+                <button onClick={()=>setEditContactPref(v=>!v)} style={{fontSize:11,color:C.navyMid,fontWeight:600,background:"none",border:`1px solid ${C.border}`,borderRadius:5,padding:"4px 10px",cursor:"pointer"}}>Edit</button>
+                <button onClick={()=>setPatients(prev=>prev.map(pt=>pt.id===patient.id?{...pt,dnc:!patient.dnc}:pt))}
+                  style={{fontSize:11,fontWeight:700,padding:"4px 10px",borderRadius:5,border:`1px solid ${patient.dnc?C.red:C.border}`,background:patient.dnc?C.redBg:C.surface,color:patient.dnc?C.red:C.muted,cursor:"pointer"}}>
+                  {patient.dnc?"Remove DNC Flag":"Enable DNC"}
+                </button>
+              </div>
+            </div>
+            {editContactPref?(
+              <div style={{display:"flex",gap:12,alignItems:"center"}}>
+                <FF label="Preferred Contact"><select value={patient.contactPref||"Call"} onChange={e=>setPatients(prev=>prev.map(pt=>pt.id===patient.id?{...pt,contactPref:e.target.value}:pt))} style={{...SS,width:130}}><option>Call</option><option>Text</option><option>Email</option></select></FF>
+                <FF label="Best Time"><select value={patient.bestTime||"Morning"} onChange={e=>setPatients(prev=>prev.map(pt=>pt.id===patient.id?{...pt,bestTime:e.target.value}:pt))} style={{...SS,width:130}}><option>Morning</option><option>Afternoon</option><option>Either</option></select></FF>
+                <button onClick={()=>setEditContactPref(false)} style={{alignSelf:"flex-end",marginBottom:0,fontSize:12,fontWeight:600,background:C.navyMid,color:"#fff",border:"none",borderRadius:6,padding:"7px 14px",cursor:"pointer"}}>Done</button>
+              </div>
+            ):(
+              <div style={{fontSize:13,color:C.text}}>
+                {patient.dnc?<span style={{color:C.red,fontWeight:700}}>⛔ Do Not Contact — all outreach blocked</span>:<span>Preferred: <strong>{patient.contactPref||"Call"}</strong> · Best time: <strong>{patient.bestTime||"Morning"}</strong></span>}
+              </div>
+            )}
           </Card>
         </div>
       )}
@@ -1472,14 +1827,30 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
       </Card>)}
       {tab==="prescriptions"&&(<Card style={{padding:"20px"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>Prescriptions</div><button onClick={()=>setShowInactiveRx(v=>!v)} style={{fontSize:11,color:C.muted,fontWeight:600,background:C.bg,border:`1px solid ${C.border}`,borderRadius:5,padding:"3px 9px",cursor:"pointer"}}>{showInactiveRx?"Hide History":"Show History"}</button></div>
-          {user.role==="doctor"&&<button onClick={()=>setSr(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ New Prescription</button>}
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{fontWeight:700,fontSize:14,color:C.text}}>Prescriptions</div>
+            {!canWriteRx&&<Badge color="blue">Read Only</Badge>}
+            <button onClick={()=>setShowInactiveRx(v=>!v)} style={{fontSize:11,color:C.muted,fontWeight:600,background:C.bg,border:`1px solid ${C.border}`,borderRadius:5,padding:"3px 9px",cursor:"pointer"}}>{showInactiveRx?"Hide History":"Show History"}</button>
+          </div>
+          {canWriteRx&&<button onClick={()=>setSr(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ New Prescription</button>}
         </div>
         {rxs.length>0||showInactiveRx?(<table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr style={{background:"#F7F9FC"}}>{["Medication","Dose","Instructions","Refills","Date","Status"].map(h=><th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+          <thead><tr style={{background:"#F7F9FC"}}>{["Medication","Dose","Instructions","Refills","Date","Status",""].map(h=><th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
           <tbody>
-            {rxs.map((rx,i)=><tr key={rx.id} style={{borderBottom:`1px solid ${C.border}`}}><td style={{padding:"12px 14px",fontWeight:700,color:C.text}}>{rx.med}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.dose}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.sig}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.refills}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.date?fmt(rx.date):"—"}</td><td style={{padding:"12px 14px"}}><Badge color="green">Active</Badge></td></tr>)}
-            {showInactiveRx&&inactiveRxs.map((rx,i)=><tr key={rx.id} style={{borderBottom:i<inactiveRxs.length-1?`1px solid ${C.border}`:"none",opacity:0.6}}><td style={{padding:"12px 14px",fontWeight:700,color:C.text}}>{rx.med}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.dose}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.sig}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.refills}</td><td style={{padding:"12px 14px",color:C.muted}}>{rx.date?fmt(rx.date):"—"}</td><td style={{padding:"12px 14px"}}><Badge color="red">Inactive</Badge></td></tr>)}
+            {rxs.map((r)=>(
+              <tr key={r.id} style={{borderBottom:`1px solid ${C.border}`}}>
+                <td style={{padding:"12px 14px",fontWeight:700,color:C.text}}>{r.med}</td>
+                <td style={{padding:"12px 14px",color:C.muted}}>{r.dose}</td>
+                <td style={{padding:"12px 14px",color:C.muted}}>{r.sig}</td>
+                <td style={{padding:"12px 14px",color:C.muted}}>{r.refills}</td>
+                <td style={{padding:"12px 14px",color:C.muted}}>{r.date?fmt(r.date):"—"}</td>
+                <td style={{padding:"12px 14px"}}><Badge color="green">Active</Badge></td>
+                <td style={{padding:"12px 14px"}}>
+                  {p.refills&&setRefillRequests&&<button onClick={()=>setRefillRequests(prev=>[...prev,{id:Date.now(),patientId:patient.id,patient:`${patient.first_name} ${patient.last_name}`,medication:`${r.med} ${r.dose}`,requestedBy:user.role,requestedByName:user.name,date:today(),status:"pending",approvedBy:null,note:""}])} style={{fontSize:11,fontWeight:600,padding:"4px 8px",borderRadius:5,border:`1px solid ${C.border}`,background:C.surface,color:C.navyMid,cursor:"pointer"}}>Request Refill</button>}
+                </td>
+              </tr>
+            ))}
+            {showInactiveRx&&inactiveRxs.map((r)=><tr key={r.id} style={{borderBottom:`1px solid ${C.border}`,opacity:0.6}}><td style={{padding:"12px 14px",fontWeight:700,color:C.text}}>{r.med}</td><td style={{padding:"12px 14px",color:C.muted}}>{r.dose}</td><td style={{padding:"12px 14px",color:C.muted}}>{r.sig}</td><td style={{padding:"12px 14px",color:C.muted}}>{r.refills}</td><td style={{padding:"12px 14px",color:C.muted}}>{r.date?fmt(r.date):"—"}</td><td style={{padding:"12px 14px"}}><Badge color="red">Inactive</Badge></td><td/></tr>)}
           </tbody>
         </table>):<div style={{color:C.muted,fontSize:13}}>No prescriptions on file.</div>}
       </Card>)}
@@ -1498,10 +1869,37 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
         </table>):(<div style={{border:`2px dashed ${C.border}`,borderRadius:10,padding:"40px 20px",textAlign:"center",color:C.muted,fontSize:13}}><div style={{fontSize:28,marginBottom:8}}>🧪</div>No lab results on file.</div>)}
       </Card>)}
       {tab==="notes"&&(<Card style={{padding:"20px"}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:16}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>Visit Notes</div>{user.role==="doctor"&&<button onClick={()=>setSn(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ New Note</button>}</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{fontWeight:700,fontSize:14,color:C.text}}>Visit Notes</div>
+            {!canWriteNotes&&<Badge color="blue">Read Only</Badge>}
+          </div>
+          {canWriteNotes&&<button onClick={()=>setSn(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ New Note</button>}
+        </div>
         {ptN.length>0?ptN.map(n=><div key={n.id} style={{border:`1px solid ${C.border}`,borderRadius:8,padding:"16px",marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><div><div style={{fontWeight:700,fontSize:13,color:C.text}}>{n.chief}</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{fmt(n.date)} · {n.doctor}</div></div>{n.signed?<Badge color="green">Signed</Badge>:<Badge color="amber">Draft</Badge>}</div>{n.assessment&&<div style={{marginBottom:8}}><div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",marginBottom:3}}>Assessment</div><div style={{fontSize:13,color:C.text}}>{n.assessment}</div></div>}{n.plan&&<div><div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",marginBottom:3}}>Plan</div><div style={{fontSize:13,color:C.text}}>{n.plan}</div></div>}</div>):<div style={{color:C.muted,fontSize:13}}>No visit notes yet.</div>}
       </Card>)}
-      {tab==="files"&&(<Card style={{padding:"20px"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:16}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>Documents</div><button style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ Upload</button></div><div style={{border:`2px dashed ${C.border}`,borderRadius:10,padding:"40px 20px",textAlign:"center",color:C.muted,fontSize:13}}><div style={{fontSize:28,marginBottom:8}}>📁</div>No files uploaded yet.</div></Card>)}
+      {tab==="files"&&(<Card style={{padding:"20px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:16}}>
+          <div style={{fontWeight:700,fontSize:14,color:C.text}}>Documents</div>
+          <button style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ Upload</button>
+        </div>
+        {patFiles.length>0?(<table style={{width:"100%",borderCollapse:"collapse"}}>
+          <thead><tr style={{background:"#F7F9FC"}}>{["File Name","Type","Date","Size",""].map(h=><th key={h} style={{padding:"9px 14px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+          <tbody>{patFiles.map((f,i)=>(
+            <tr key={f.id} style={{borderBottom:i<patFiles.length-1?`1px solid ${C.border}`:"none"}}>
+              <td style={{padding:"12px 14px",fontWeight:600,color:C.text}}>📄 {f.name}</td>
+              <td style={{padding:"12px 14px"}}><Badge color="blue">{f.type}</Badge></td>
+              <td style={{padding:"12px 14px",color:C.muted}}>{fmt(f.date)}</td>
+              <td style={{padding:"12px 14px",color:C.muted}}>{f.size}</td>
+              <td style={{padding:"12px 14px"}}><button style={{fontSize:11,fontWeight:600,padding:"3px 9px",borderRadius:5,border:`1px solid ${C.border}`,background:C.surface,color:C.navyMid,cursor:"pointer"}}>⬇ Download</button></td>
+            </tr>
+          ))}</tbody>
+        </table>):(
+          <div style={{border:`2px dashed ${C.border}`,borderRadius:10,padding:"40px 20px",textAlign:"center",color:C.muted,fontSize:13}}>
+            <div style={{fontSize:28,marginBottom:8}}>📁</div>No files uploaded yet.
+          </div>
+        )}
+      </Card>)}
       {tab==="recalls"&&(<Card style={{padding:"20px"}}>
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:16}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>Recall Flags</div><button onClick={()=>setSc(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ Add Recall</button></div>
         {recalls.filter(r=>r.patient===`${patient.first_name} ${patient.last_name}`).length>0?recalls.filter(r=>r.patient===`${patient.first_name} ${patient.last_name}`).map((r,i,arr)=><div key={r.id} style={{padding:"12px 0",borderBottom:i<arr.length-1?`1px solid ${C.border}`:"none",display:"flex",alignItems:"center",gap:12}}><div style={{flex:1}}><div style={{fontWeight:600,fontSize:13,color:C.text}}>{r.reason}</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>Due {fmt(r.due)}</div></div><Badge color={r.urgency==="high"?"red":r.urgency==="medium"?"amber":"blue"}>{r.urgency}</Badge></div>):<div style={{color:C.muted,fontSize:13}}>No recall flags for this patient.</div>}
@@ -1510,12 +1908,17 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
   );
 }
 
-function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes,setNotes,recalls,setRecalls,appts,setAppts}){
+function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes,setNotes,recalls,setRecalls,appts,setAppts,draftNotes,setDraftNotes,refillRequests,setRefillRequests,onOpenPatient,openPatientId,setOpenPatientId,setPage,showToast}){
   const[search,setSearch]=useState("");const[sel,setSel]=useState(null);const[showNew,setShowNew]=useState(false);
   const[quickMenu,setQuickMenu]=useState(null); // patient id with open menu
   const[quickNewAppt,setQuickNewAppt]=useState(null);
   const[quickRecall,setQuickRecall]=useState(null);
   const[quickVitals,setQuickVitals]=useState(null);
+  const[loading,setLoading]=useState(true);
+  useEffect(()=>{const t=setTimeout(()=>setLoading(false),600);return()=>clearTimeout(t);},[]);
+  useEffect(()=>{
+    if(openPatientId){const pt=patients.find(p=>p.id===openPatientId);if(pt){setSel(pt);if(setOpenPatientId)setOpenPatientId(null);}}
+  },[openPatientId]);
   const q=search.toLowerCase();
   const filt=patients.filter(p=>{
     if(!q)return true;
@@ -1532,16 +1935,21 @@ function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes
     const today=new Date().toISOString().split("T")[0];
     return appts.filter(a=>a.patient===name&&a.date>="2026-02-25"&&a.status!=="completed"&&a.status!=="no-show").sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time))[0]||null;
   };
-  if(sel)return<PatientProfile patient={sel} onBack={()=>setSel(null)} user={user} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} recalls={recalls} setRecalls={setRecalls} patients={patients} setPatients={setPatients}/>;
+  if(sel)return<PatientProfile patient={sel} onBack={()=>setSel(null)} user={user} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} recalls={recalls} setRecalls={setRecalls} patients={patients} setPatients={setPatients} draftNotes={draftNotes||{}} setDraftNotes={setDraftNotes} refillRequests={refillRequests} setRefillRequests={setRefillRequests} onOpenPatient={onOpenPatient}/>;
   return(
     <div style={{padding:"28px 32px",maxWidth:1100}}>
       {showNew&&<NewPatientModal onClose={()=>setShowNew(false)} onSave={p=>{setPatients(prev=>[...prev,p]);setShowNew(false);}}/>}
       {quickNewAppt&&<NewApptModal onClose={()=>setQuickNewAppt(null)} onSave={a=>{setAppts(p=>[...p,a]);setQuickNewAppt(null);}} patients={patients} appts={appts} defaultDate="2026-02-25"/>}
       {quickRecall&&<RecallModal onClose={()=>setQuickRecall(null)} onSave={r=>{setRecalls(p=>[...p,r]);setQuickRecall(null);}} patients={patients}/>}
       {quickVitals&&<VitalsModal patient={quickVitals} onClose={()=>setQuickVitals(null)} onSave={(pid,data)=>{setVitals(p=>({...p,[pid]:data}));setQuickVitals(null);}}/>}
+      {loading&&<div>{[...Array(5)].map((_,i)=><div key={i} style={{background:"#E8ECF0",borderRadius:8,height:44,marginBottom:8,animation:"pulse 1.2s ease infinite"}}/>)}</div>}
+      {!loading&&<>
       <div style={{marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
         <div><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Patients</h1><p style={{color:C.muted,fontSize:14,marginTop:4}}>{patients.length} total · {patients.filter(p=>p.active!==false).length} active</p></div>
-        {(user.role==="receptionist"||user.role==="admin")&&<button onClick={()=>setShowNew(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 18px",fontSize:13,fontWeight:600,cursor:"pointer"}}>+ New Patient</button>}
+        <div style={{display:"flex",gap:8}}>
+          {PERMS[user.role].refills&&!PERMS[user.role].refillApprove&&setPage&&<button onClick={()=>setPage("refills")} style={{background:C.surface,color:C.navyMid,border:`1px solid ${C.border}`,borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>♻ Refill Queue</button>}
+          {(user.role==="receptionist"||user.role==="admin")&&<button onClick={()=>setShowNew(true)} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 18px",fontSize:13,fontWeight:600,cursor:"pointer"}}>+ New Patient</button>}
+        </div>
       </div>
       <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name, phone, date of birth, or insurance…" style={{width:"100%",padding:"10px 14px",borderRadius:8,border:`1px solid ${C.border}`,fontSize:14,color:C.text,outline:"none",background:C.surface,boxSizing:"border-box",marginBottom:16}}/>
       <Card>
@@ -1552,7 +1960,7 @@ function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes
             const isOpen=quickMenu===p.id;
             return(
               <tr key={p.id} onClick={()=>setSel(p)} style={{borderBottom:i<filt.length-1?`1px solid ${C.border}`:"none",cursor:"pointer",opacity:p.active===false?0.6:1}} onMouseEnter={e=>e.currentTarget.style.background="#F7F9FC"} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:30,height:30,borderRadius:"50%",background:p.active===false?"#CBD5E1":C.navyMid,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0}}>{p.first_name[0]}{p.last_name[0]}</div><div style={{fontWeight:600,fontSize:13,color:C.text}}>{p.first_name} {p.last_name}</div></div></td>
+                <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:30,height:30,borderRadius:"50%",background:p.active===false?"#CBD5E1":C.navyMid,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0}}>{p.first_name[0]}{p.last_name[0]}</div><div><div style={{fontWeight:600,fontSize:13,color:C.text}}>{p.first_name} {p.last_name}</div>{p.dnc&&<span style={{background:C.redBg,color:C.red,fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:3}}>DNC</span>}</div></div></td>
                 <td style={{padding:"13px 16px"}}><Badge color={p.active===false?"red":"green"}>{p.active===false?"Inactive":"Active"}</Badge></td>
                 <td style={{padding:"13px 16px",fontSize:13,color:C.muted}}>{fmt(p.dob)} · {age(p.dob)} yrs</td>
                 <td style={{padding:"13px 16px",fontSize:13,color:C.muted}}>{p.phone}</td>
@@ -1581,11 +1989,12 @@ function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes
           })}</tbody>
         </table>
       </Card>
+      </>}
     </div>
   );
 }
 
-function RecallsPage({recalls,setRecalls,patients}){
+function RecallsPage({recalls,setRecalls,patients,appts,setAppts,blockTimes}){
   const[filter,setFilter]=useState("all");const[showNew,setShowNew]=useState(false);
   const[sortDoc,setSortDoc]=useState("all");
   const[checked,setChecked]=useState(new Set());
@@ -1593,7 +2002,10 @@ function RecallsPage({recalls,setRecalls,patients}){
   const[contactLogs,setContactLogs]=useState(INIT_CONTACT_LOGS);
   const[addingLog,setAddingLog]=useState(null);
   const[logForm,setLogForm]=useState({method:"Phone",outcome:""});
+  const[pendingRecallAppt,setPendingRecallAppt]=useState(null);
+  const[showBookAppt,setShowBookAppt]=useState(false);
   const done=(ids)=>setRecalls(p=>p.filter(r=>!ids.includes(r.id)));
+  const completeSingle=(r)=>{done([r.id]);setPendingRecallAppt(r);};
   const DOCTORS=["all",...[...new Set(recalls.map(r=>r.doctor||"").filter(Boolean))]];
   let filt=filter==="all"?recalls:recalls.filter(r=>r.urgency===filter);
   if(sortDoc!=="all")filt=filt.filter(r=>r.doctor===sortDoc);
@@ -1606,6 +2018,58 @@ function RecallsPage({recalls,setRecalls,patients}){
   return(
     <div style={{padding:"28px 32px",maxWidth:900}}>
       {showNew&&<RecallModal onClose={()=>setShowNew(false)} onSave={r=>{setRecalls(p=>[...p,r]);setShowNew(false);}} patients={patients}/>}
+      {showBookAppt&&pendingRecallAppt&&(
+        <NewApptModal
+          onClose={()=>{setShowBookAppt(false);setPendingRecallAppt(null);}}
+          onSave={(a)=>{if(setAppts)setAppts(p=>[...p,a]);setShowBookAppt(false);setPendingRecallAppt(null);}}
+          patients={patients}
+          appts={appts||[]}
+          blockTimes={blockTimes||[]}
+          prefill={{
+            pid: patients.find(p=>`${p.first_name} ${p.last_name}`===pendingRecallAppt.patient)?.id||"",
+            doc: pendingRecallAppt.doctor||"Dr. Patel",
+            type: "follow-up",
+            notes: pendingRecallAppt.reason||"",
+          }}
+        />
+      )}
+      {pendingRecallAppt&&!showBookAppt&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:20}}>
+          <div style={{background:C.surface,borderRadius:14,width:"100%",maxWidth:440,boxShadow:"0 20px 60px rgba(0,0,0,0.3)",overflow:"hidden"}}>
+            <div style={{padding:"20px 24px",borderBottom:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                <span style={{fontSize:22}}>✅</span>
+                <div style={{fontWeight:700,fontSize:16,color:C.text}}>Recall Complete</div>
+              </div>
+              <div style={{fontSize:13,color:C.muted}}>Would you like to book a follow-up appointment?</div>
+            </div>
+            <div style={{padding:"18px 24px"}}>
+              <div style={{background:C.bg,borderRadius:8,padding:"12px 14px",marginBottom:16}}>
+                <div style={{display:"flex",gap:16}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",marginBottom:3}}>Patient</div>
+                    <div style={{fontSize:13,fontWeight:600,color:C.text}}>{pendingRecallAppt.patient}</div>
+                  </div>
+                  {pendingRecallAppt.doctor&&(
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",marginBottom:3}}>Doctor</div>
+                      <div style={{fontSize:13,fontWeight:600,color:C.text}}>{pendingRecallAppt.doctor}</div>
+                    </div>
+                  )}
+                </div>
+                <div style={{marginTop:10}}>
+                  <div style={{fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",marginBottom:3}}>Recall Reason</div>
+                  <div style={{fontSize:13,color:C.text}}>{pendingRecallAppt.reason}</div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+                <XB onClick={()=>setPendingRecallAppt(null)}>Skip</XB>
+                <PB onClick={()=>setShowBookAppt(true)}>📅 Book Appointment</PB>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
         <div><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Recall & Follow-Up</h1><p style={{color:C.muted,fontSize:14,marginTop:4}}>{recalls.length} open recall{recalls.length!==1?"s":""}</p></div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -1647,7 +2111,7 @@ function RecallsPage({recalls,setRecalls,patients}){
                   </div>
                 </div>
                 <Badge color={r.urgency==="high"?"red":r.urgency==="medium"?"amber":"blue"}>{r.urgency}</Badge>
-                <button onClick={()=>done([r.id])} style={{padding:"7px 14px",borderRadius:6,border:`1px solid ${C.border}`,background:C.surface,color:C.green,fontSize:12,fontWeight:600,cursor:"pointer"}}>Mark Complete</button>
+                <button onClick={()=>completeSingle(r)} style={{padding:"7px 14px",borderRadius:6,border:`1px solid ${C.border}`,background:C.surface,color:C.green,fontSize:12,fontWeight:600,cursor:"pointer"}}>Mark Complete</button>
               </div>
               {isExpanded&&(
                 <div style={{background:C.bg,borderTop:`1px solid ${C.border}`,padding:"14px 20px 14px 52px"}}>
@@ -1682,24 +2146,54 @@ function RecallsPage({recalls,setRecalls,patients}){
 
 function AdminPage(){
   const[tab,setTab]=useState("users");
+  const[loginFilter,setLoginFilter]=useState("all");
+  const filteredLogins=loginFilter==="all"?INIT_LOGIN_HISTORY:INIT_LOGIN_HISTORY.filter(l=>l.status===loginFilter);
   return(
     <div style={{padding:"28px 32px",maxWidth:900}}>
       <div style={{marginBottom:24}}><h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Admin Panel</h1></div>
       <div style={{display:"flex",marginBottom:16,borderBottom:`1px solid ${C.border}`}}>
-        {["users","audit log","backup"].map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"10px 20px",border:"none",background:"none",cursor:"pointer",fontSize:13,fontWeight:tab===t?700:400,color:tab===t?C.navyMid:C.muted,borderBottom:tab===t?`2px solid ${C.navyMid}`:"2px solid transparent",marginBottom:-1,textTransform:"capitalize"}}>{t}</button>)}
+        {["users","audit log","login history","backup"].map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"10px 20px",border:"none",background:"none",cursor:"pointer",fontSize:13,fontWeight:tab===t?700:400,color:tab===t?C.navyMid:C.muted,borderBottom:tab===t?`2px solid ${C.navyMid}`:"2px solid transparent",marginBottom:-1,textTransform:"capitalize"}}>{t}</button>)}
       </div>
       {tab==="users"&&(<Card><div style={{padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:`1px solid ${C.border}`}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>Staff Users</div><button style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ Add User</button></div><table style={{width:"100%",borderCollapse:"collapse"}}><thead><tr style={{background:"#F7F9FC"}}>{["Name","Role","Status","Last Login",""].map(h=><th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead><tbody>{STAFF_LIST.map((s,i)=><tr key={s.id} style={{borderBottom:i<STAFF_LIST.length-1?`1px solid ${C.border}`:"none"}}><td style={{padding:"13px 16px",fontWeight:600,fontSize:13,color:C.text}}>{s.name}</td><td style={{padding:"13px 16px"}}><Badge color={s.role==="admin"?"purple":s.role==="doctor"?"navy":s.role==="nurse"?"green":"amber"}>{s.role}</Badge></td><td style={{padding:"13px 16px"}}><Badge color={s.status==="active"?"green":"red"}>{s.status}</Badge></td><td style={{padding:"13px 16px",fontSize:12,color:C.muted}}>{s.lastLogin}</td><td style={{padding:"13px 16px"}}><button style={{fontSize:12,color:C.navyMid,fontWeight:600,background:"none",border:`1px solid ${C.border}`,borderRadius:5,padding:"4px 10px",cursor:"pointer"}}>Edit</button></td></tr>)}</tbody></table></Card>)}
       {tab==="audit log"&&(<Card style={{padding:"20px"}}><div style={{fontWeight:700,fontSize:14,color:C.text,marginBottom:16}}>Audit Log</div>{[{user:"Dr. Patel",action:"VIEW_PATIENT",detail:"Margaret Chen",time:"09:14"},{user:"James Torres",action:"RECORD_VITALS",detail:"Derek Marsh",time:"09:02"},{user:"Brianna Wells",action:"CHECK_IN",detail:"Margaret Chen",time:"08:55"},{user:"admin",action:"LOGIN",detail:"",time:"08:30"}].map((l,i,arr)=><div key={i} style={{padding:"11px 0",display:"flex",alignItems:"center",gap:14,borderBottom:i<arr.length-1?`1px solid ${C.border}`:"none"}}><div style={{fontSize:11,color:C.muted,width:40,flexShrink:0}}>{l.time}</div><div style={{width:140,flexShrink:0}}><Badge color="navy">{l.action}</Badge></div><div style={{fontSize:13,color:C.text,flex:1}}>{l.user}{l.detail&&<span style={{color:C.muted}}> → {l.detail}</span>}</div></div>)}</Card>)}
+      {tab==="login history"&&(
+        <Card>
+          <div style={{padding:"16px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:`1px solid ${C.border}`}}>
+            <div style={{fontWeight:700,fontSize:14,color:C.text}}>Login History</div>
+            <div style={{display:"flex",gap:6}}>
+              {["all","Success","Failed"].map(f=><button key={f} onClick={()=>setLoginFilter(f)} style={{fontSize:12,fontWeight:600,padding:"4px 12px",borderRadius:20,border:`1px solid ${loginFilter===f?C.navyMid:C.border}`,background:loginFilter===f?C.blueBg:C.surface,color:loginFilter===f?C.navyMid:C.muted,cursor:"pointer"}}>{f==="all"?"All":f}</button>)}
+            </div>
+          </div>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr style={{background:"#F7F9FC"}}>{["User","Role","Username","Time","Status"].map(h=><th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+            <tbody>{filteredLogins.map((l,i)=>(
+              <tr key={l.id} style={{borderBottom:i<filteredLogins.length-1?`1px solid ${C.border}`:"none"}}>
+                <td style={{padding:"12px 16px",fontWeight:600,fontSize:13,color:C.text}}>{l.user}</td>
+                <td style={{padding:"12px 16px"}}><Badge color={l.role==="admin"?"purple":l.role==="doctor"?"navy":l.role==="nurse"?"green":l.role==="receptionist"?"amber":"red"}>{l.role}</Badge></td>
+                <td style={{padding:"12px 16px",fontSize:12,color:C.muted,fontFamily:"monospace"}}>{l.username}</td>
+                <td style={{padding:"12px 16px",fontSize:12,color:C.muted}}>{l.ts}</td>
+                <td style={{padding:"12px 16px"}}><Badge color={l.status==="Success"?"green":"red"}>{l.status}</Badge></td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </Card>
+      )}
       {tab==="backup"&&(<Card style={{padding:"24px"}}><div style={{fontWeight:700,fontSize:14,color:C.text,marginBottom:6}}>Database Backup</div><div style={{fontSize:13,color:C.muted,marginBottom:20}}>Last backup: never</div><button style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 20px",fontSize:13,fontWeight:600,cursor:"pointer"}}>Run Backup Now</button></Card>)}
     </div>
   );
 }
 
-function SettingsPage({user,settings,setSettings,setPage}){
+function SettingsPage({user,settings,setSettings,setPage,blockTimes,setBlockTimes}){
   const[saved,setSaved]=useState(false);
   const[local,setLocal]=useState(settings||INIT_SETTINGS);
+  const[btForm,setBtForm]=useState({doctor:"Dr. Priya Patel",date:"",from:"",to:"",reason:"Lunch"});
   const s=(k,v)=>setLocal(p=>({...p,[k]:v}));
   const save=()=>{setSettings(local);setSaved(true);setTimeout(()=>setSaved(false),2500);};
+  const addBlockTime=()=>{
+    if(!btForm.date||!btForm.from||!btForm.to)return;
+    if(setBlockTimes)setBlockTimes(prev=>[...prev,{...btForm,id:Date.now()}]);
+    setBtForm({doctor:"Dr. Priya Patel",date:"",from:"",to:"",reason:"Lunch"});
+  };
   const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const lbl={display:"block",fontSize:12,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:6};
   return(
@@ -1763,9 +2257,255 @@ function SettingsPage({user,settings,setSettings,setPage}){
           <button style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 20px",fontSize:13,fontWeight:600,cursor:"pointer"}}>Update Password</button>
         </div>
       </Card>
+      {user.role==="admin"&&(
+        <Card style={{marginBottom:16}}>
+          <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.border}`}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>Schedule Management — Block Times</div></div>
+          <div style={{padding:"20px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr auto",gap:10,marginBottom:14,alignItems:"flex-end"}}>
+              <div><label style={lbl}>Doctor</label><select value={btForm.doctor} onChange={e=>setBtForm(f=>({...f,doctor:e.target.value}))} style={{...SS,fontSize:13}}>
+                <option>Dr. Priya Patel</option><option>Dr. Owen Williams</option>
+              </select></div>
+              <div><label style={lbl}>Date</label><input type="date" value={btForm.date} onChange={e=>setBtForm(f=>({...f,date:e.target.value}))} style={{...IS,fontSize:13}}/></div>
+              <div><label style={lbl}>From</label><input type="time" value={btForm.from} onChange={e=>setBtForm(f=>({...f,from:e.target.value}))} style={{...IS,fontSize:13}}/></div>
+              <div><label style={lbl}>To</label><input type="time" value={btForm.to} onChange={e=>setBtForm(f=>({...f,to:e.target.value}))} style={{...IS,fontSize:13}}/></div>
+              <div><label style={lbl}>Reason</label><select value={btForm.reason} onChange={e=>setBtForm(f=>({...f,reason:e.target.value}))} style={{...SS,fontSize:13}}>
+                {["Lunch","Meeting","Vacation","Conference","Personal"].map(r=><option key={r}>{r}</option>)}
+              </select></div>
+              <button onClick={addBlockTime} disabled={!btForm.date||!btForm.from||!btForm.to} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 16px",fontSize:13,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap"}}>+ Add</button>
+            </div>
+            {(blockTimes||[]).length>0?(
+              <table style={{width:"100%",borderCollapse:"collapse",marginTop:8}}>
+                <thead><tr style={{background:"#F7F9FC"}}>{["Doctor","Date","Time","Reason",""].map(h=><th key={h} style={{padding:"8px 12px",textAlign:"left",fontSize:11,fontWeight:700,color:C.muted,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+                <tbody>{(blockTimes||[]).map((b,i)=>(
+                  <tr key={b.id} style={{borderBottom:i<(blockTimes||[]).length-1?`1px solid ${C.border}`:"none"}}>
+                    <td style={{padding:"10px 12px",fontSize:13,color:C.text,fontWeight:600}}>{b.doctor}</td>
+                    <td style={{padding:"10px 12px",fontSize:13,color:C.muted}}>{b.date}</td>
+                    <td style={{padding:"10px 12px",fontSize:13,color:C.muted}}>{b.from} – {b.to}</td>
+                    <td style={{padding:"10px 12px"}}><Badge color="amber">{b.reason}</Badge></td>
+                    <td style={{padding:"10px 12px"}}><button onClick={()=>setBlockTimes&&setBlockTimes(prev=>prev.filter(x=>x.id!==b.id))} style={{fontSize:11,color:C.red,fontWeight:600,background:"none",border:`1px solid ${C.border}`,borderRadius:5,padding:"3px 8px",cursor:"pointer"}}>Delete</button></td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            ):<div style={{color:C.muted,fontSize:13}}>No block times set.</div>}
+          </div>
+        </Card>
+      )}
       <div style={{display:"flex",alignItems:"center",gap:12}}>
         <button onClick={save} style={{background:C.navyMid,color:"#fff",border:"none",borderRadius:7,padding:"9px 20px",fontSize:13,fontWeight:600,cursor:"pointer"}}>Save All Settings</button>
         {saved&&<span style={{color:C.green,fontSize:13,fontWeight:600}}>✓ Saved</span>}
+      </div>
+    </div>
+  );
+}
+
+// ─── RefillQueuePage ───────────────────────────────────────────────────────────
+function RefillQueuePage({user,patients,rx,setRx,refillRequests,setRefillRequests}){
+  const p=PERMS[user.role];
+  const[newReq,setNewReq]=useState({patientId:"",medication:""});
+  const[reviewId,setReviewId]=useState(null);
+  const[reviewNote,setReviewNote]=useState("");
+  const[loading,setLoading]=useState(true);
+  useEffect(()=>{const t=setTimeout(()=>setLoading(false),600);return()=>clearTimeout(t);},[]);
+  const pending=(refillRequests||[]).filter(r=>r.status==="pending");
+  const others=(refillRequests||[]).filter(r=>r.status!=="pending");
+  const submit=()=>{
+    if(!newReq.patientId||!newReq.medication.trim())return;
+    const pt=patients.find(x=>x.id===parseInt(newReq.patientId));
+    if(!pt)return;
+    setRefillRequests(prev=>[...prev,{id:Date.now(),patientId:pt.id,patient:`${pt.first_name} ${pt.last_name}`,medication:newReq.medication.trim(),requestedBy:user.role,requestedByName:user.name,date:today(),status:"pending",approvedBy:null,note:""}]);
+    setNewReq({patientId:"",medication:""});
+  };
+  const approve=(id)=>{
+    setRefillRequests(prev=>prev.map(r=>r.id===id?{...r,status:"approved",approvedBy:user.name,note:reviewNote}:r));
+    setReviewId(null);setReviewNote("");
+  };
+  const deny=(id)=>{
+    setRefillRequests(prev=>prev.map(r=>r.id===id?{...r,status:"denied",approvedBy:user.name,note:reviewNote}:r));
+    setReviewId(null);setReviewNote("");
+  };
+  return(
+    <div style={{padding:"28px 32px",maxWidth:900}}>
+      <div style={{marginBottom:24,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+        <div>
+          <h1 style={{fontSize:22,fontWeight:700,color:C.text,margin:0}}>Refill Queue</h1>
+          <p style={{color:C.muted,fontSize:14,marginTop:4}}>{pending.length} pending request{pending.length!==1?"s":""}</p>
+        </div>
+      </div>
+      {loading&&<div>{[...Array(4)].map((_,i)=><div key={i} style={{background:"#E8ECF0",borderRadius:8,height:44,marginBottom:8,animation:"pulse 1.2s ease infinite"}}/>)}</div>}
+      {!loading&&<>
+        {!p.refillApprove&&(
+          <Card style={{marginBottom:16,padding:"20px"}}>
+            <div style={{fontWeight:700,fontSize:13,color:C.text,marginBottom:14}}>Submit New Refill Request</div>
+            <div style={{display:"flex",gap:10,alignItems:"flex-end"}}>
+              <div style={{flex:1}}><label style={LS}>Patient</label>
+                <select value={newReq.patientId} onChange={e=>setNewReq(f=>({...f,patientId:e.target.value}))} style={SS}>
+                  <option value="">Select patient…</option>
+                  {patients.map(pt=><option key={pt.id} value={pt.id}>{pt.first_name} {pt.last_name}</option>)}
+                </select>
+              </div>
+              <div style={{flex:1}}><label style={LS}>Medication</label>
+                <input value={newReq.medication} onChange={e=>setNewReq(f=>({...f,medication:e.target.value}))} placeholder="e.g. Lisinopril 10mg" style={IS}/>
+              </div>
+              <PB onClick={submit} disabled={!newReq.patientId||!newReq.medication.trim()}>Submit Request</PB>
+            </div>
+          </Card>
+        )}
+        <Card style={{marginBottom:16}}>
+          <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.border}`,fontWeight:700,fontSize:14,color:C.text}}>Pending Requests {pending.length>0&&<span style={{background:C.amberBg,color:C.amber,fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10,marginLeft:8}}>{pending.length}</span>}</div>
+          {pending.length===0&&<div style={{padding:"24px",color:C.muted,fontSize:13,textAlign:"center"}}>No pending refill requests. ✓</div>}
+          {pending.map((r,i)=>(
+            <div key={r.id} style={{borderBottom:i<pending.length-1?`1px solid ${C.border}`:"none"}}>
+              <div style={{padding:"14px 20px",display:"flex",alignItems:"center",gap:14}}>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,fontSize:13,color:C.text}}>{r.patient}</div>
+                  <div style={{fontSize:12,color:C.muted,marginTop:2}}>{r.medication}</div>
+                  <div style={{fontSize:11,color:C.muted,marginTop:2}}>Requested by {r.requestedByName} ({r.requestedBy}) · {r.date}</div>
+                </div>
+                <Badge color="amber">Pending</Badge>
+                {p.refillApprove&&<button onClick={()=>setReviewId(reviewId===r.id?null:r.id)} style={{fontSize:12,fontWeight:700,padding:"6px 14px",borderRadius:6,border:`1px solid ${C.navyMid}`,background:C.blueBg,color:C.navyMid,cursor:"pointer"}}>Review</button>}
+              </div>
+              {reviewId===r.id&&(
+                <div style={{background:C.bg,borderTop:`1px solid ${C.border}`,padding:"16px 20px"}}>
+                  <div style={{fontWeight:700,fontSize:12,color:C.muted,textTransform:"uppercase",marginBottom:10}}>Current Medications for {r.patient}</div>
+                  {(rx[r.patientId]||[]).map(med=><div key={med.id} style={{fontSize:13,color:C.text,marginBottom:4}}>• {med.med} {med.dose} — {med.sig}</div>)}
+                  {!(rx[r.patientId]||[]).length&&<div style={{fontSize:13,color:C.muted,marginBottom:10}}>No active medications on file.</div>}
+                  <div style={{marginTop:12,marginBottom:10}}><label style={LS}>Doctor Note (optional)</label><input value={reviewNote} onChange={e=>setReviewNote(e.target.value)} placeholder="Add note…" style={IS}/></div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={()=>approve(r.id)} style={{background:C.green,color:"#fff",border:"none",borderRadius:7,padding:"8px 18px",fontSize:13,fontWeight:700,cursor:"pointer"}}>✓ Approve</button>
+                    <button onClick={()=>deny(r.id)} style={{background:C.red,color:"#fff",border:"none",borderRadius:7,padding:"8px 18px",fontSize:13,fontWeight:700,cursor:"pointer"}}>✗ Deny</button>
+                    <XB onClick={()=>{setReviewId(null);setReviewNote("");}}>Cancel</XB>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </Card>
+        {others.length>0&&(
+          <Card>
+            <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.border}`,fontWeight:700,fontSize:14,color:C.text}}>Completed Requests</div>
+            {others.map((r,i)=>(
+              <div key={r.id} style={{padding:"12px 20px",display:"flex",alignItems:"center",gap:14,borderBottom:i<others.length-1?`1px solid ${C.border}`:"none"}}>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:600,fontSize:13,color:C.text}}>{r.patient} — {r.medication}</div>
+                  <div style={{fontSize:12,color:C.muted,marginTop:2}}>By {r.requestedByName} · {r.date}</div>
+                  {r.note&&<div style={{fontSize:12,color:r.status==="denied"?C.red:C.green,marginTop:2,fontStyle:"italic"}}>{r.note}</div>}
+                </div>
+                <Badge color={r.status==="approved"?"green":"red"}>{r.status}</Badge>
+              </div>
+            ))}
+          </Card>
+        )}
+      </>}
+    </div>
+  );
+}
+
+// ─── GlobalSearch ──────────────────────────────────────────────────────────────
+function GlobalSearch({patients,appts,onClose,onSelectPatient,onSelectAppt}){
+  const[q,setQ]=useState("");
+  const inputRef=useRef(null);
+  useEffect(()=>{if(inputRef.current)inputRef.current.focus();},[]);
+  const lq=q.toLowerCase();
+  const ptResults=q.length>1?patients.filter(p=>`${p.first_name} ${p.last_name}`.toLowerCase().includes(lq)||(p.phone||"").includes(lq)).slice(0,6):[];
+  const apptResults=q.length>1?appts.filter(a=>a.patient.toLowerCase().includes(lq)).slice(0,4):[];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:2000,display:"flex",alignItems:"flex-start",justifyContent:"center",paddingTop:80}} onClick={onClose}>
+      <div style={{background:C.surface,borderRadius:14,width:"100%",maxWidth:560,boxShadow:"0 20px 60px rgba(0,0,0,0.3)",overflow:"hidden"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"center",gap:10,padding:"14px 18px",borderBottom:`1px solid ${C.border}`}}>
+          <span style={{fontSize:18,color:C.muted}}>🔍</span>
+          <input ref={inputRef} value={q} onChange={e=>setQ(e.target.value)} placeholder="Search patients, appointments…" style={{flex:1,border:"none",outline:"none",fontSize:16,color:C.text,background:"transparent"}} onKeyDown={e=>e.key==="Escape"&&onClose()}/>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:20,color:C.muted,cursor:"pointer",padding:"2px 6px"}}>×</button>
+        </div>
+        <div style={{maxHeight:400,overflow:"auto"}}>
+          {q.length<2&&<div style={{padding:"24px",textAlign:"center",color:C.muted,fontSize:13}}>Type to search patients and appointments…</div>}
+          {ptResults.length>0&&(
+            <div>
+              <div style={{padding:"10px 18px 4px",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em"}}>Patients</div>
+              {ptResults.map(pt=>(
+                <button key={pt.id} onClick={()=>onSelectPatient(pt)} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"11px 18px",border:"none",background:"none",textAlign:"left",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background=C.bg} onMouseLeave={e=>e.currentTarget.style.background="none"}>
+                  <div style={{width:30,height:30,borderRadius:"50%",background:C.navyMid,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0}}>{pt.first_name[0]}{pt.last_name[0]}</div>
+                  <div><div style={{fontWeight:600,fontSize:13,color:C.text}}>{pt.first_name} {pt.last_name}</div><div style={{fontSize:12,color:C.muted}}>{pt.phone} · {pt.insurance}</div></div>
+                  {pt.dnc&&<span style={{marginLeft:"auto",background:C.redBg,color:C.red,fontSize:9,fontWeight:700,padding:"2px 5px",borderRadius:3}}>DNC</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {apptResults.length>0&&(
+            <div style={{borderTop:ptResults.length>0?`1px solid ${C.border}`:"none"}}>
+              <div style={{padding:"10px 18px 4px",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em"}}>Appointments</div>
+              {apptResults.map(a=>(
+                <button key={a.id} onClick={()=>onSelectAppt(a)} style={{display:"flex",alignItems:"center",gap:12,width:"100%",padding:"11px 18px",border:"none",background:"none",textAlign:"left",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background=C.bg} onMouseLeave={e=>e.currentTarget.style.background="none"}>
+                  <span style={{fontSize:16}}>📅</span>
+                  <div><div style={{fontWeight:600,fontSize:13,color:C.text}}>{a.patient}</div><div style={{fontSize:12,color:C.muted}}>{a.date} {a.time} · {a.doctor} · <SB status={a.status}/></div></div>
+                </button>
+              ))}
+            </div>
+          )}
+          {q.length>=2&&ptResults.length===0&&apptResults.length===0&&(
+            <div style={{padding:"24px",textAlign:"center",color:C.muted,fontSize:13}}>No results found for "{q}"</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── FollowUpModal ─────────────────────────────────────────────────────────────
+function FollowUpModal({patient,doctor,onClose,onBook}){
+  const addDays=(n)=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split("T")[0];};
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1500,padding:20}}>
+      <div style={{background:C.surface,borderRadius:14,width:"100%",maxWidth:400,boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
+        <div style={{padding:"18px 24px",borderBottom:`1px solid ${C.border}`}}>
+          <div style={{fontWeight:700,fontSize:16,color:C.text}}>Schedule Follow-Up?</div>
+          <div style={{fontSize:13,color:C.muted,marginTop:4}}>For {patient} with {doctor}</div>
+        </div>
+        <div style={{padding:"20px 24px"}}>
+          <div style={{fontSize:13,color:C.muted,marginBottom:16}}>When should this patient return?</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {[["2 Weeks",14],["1 Month",30],["3 Months",90]].map(([lbl,days])=>(
+              <button key={lbl} onClick={()=>onBook(addDays(days))} style={{padding:"12px 18px",borderRadius:8,border:`1px solid ${C.border}`,background:C.bg,color:C.text,fontSize:14,fontWeight:600,cursor:"pointer",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}} onMouseEnter={e=>e.currentTarget.style.background=C.blueBg} onMouseLeave={e=>e.currentTarget.style.background=C.bg}>
+                <span>{lbl}</span><span style={{fontSize:12,color:C.muted}}>{addDays(days)}</span>
+              </button>
+            ))}
+            <button onClick={onClose} style={{padding:"10px 18px",borderRadius:8,border:`1px solid ${C.border}`,background:C.surface,color:C.muted,fontSize:13,fontWeight:600,cursor:"pointer",marginTop:4}}>No Thanks — Skip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── EndOfDayModal ─────────────────────────────────────────────────────────────
+function EndOfDayModal({onClose}){
+  const[checks,setChecks]=useState({notes:false,recalls:false,schedule:false});
+  const allChecked=Object.values(checks).every(Boolean);
+  const toggle=(k)=>setChecks(p=>({...p,[k]:!p[k]}));
+  const items=[
+    {key:"notes",    label:"All visit notes signed and co-signed"},
+    {key:"recalls",  label:"Recall follow-ups reviewed and assigned"},
+    {key:"schedule", label:"Tomorrow's schedule confirmed"},
+  ];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1500,padding:20}}>
+      <div style={{background:C.surface,borderRadius:14,width:"100%",maxWidth:440,boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
+        <div style={{padding:"20px 24px",borderBottom:`1px solid ${C.border}`}}>
+          <div style={{fontSize:24,marginBottom:6}}>🌙</div>
+          <div style={{fontWeight:700,fontSize:18,color:C.text}}>End of Day Checklist</div>
+          <div style={{fontSize:13,color:C.muted,marginTop:4}}>All appointments are complete. Please confirm the following before closing out.</div>
+        </div>
+        <div style={{padding:"20px 24px"}}>
+          {items.map(item=>(
+            <label key={item.key} style={{display:"flex",alignItems:"center",gap:14,padding:"12px 0",borderBottom:`1px solid ${C.border}`,cursor:"pointer"}}>
+              <input type="checkbox" checked={checks[item.key]} onChange={()=>toggle(item.key)} style={{width:18,height:18,cursor:"pointer",flexShrink:0}}/>
+              <span style={{fontSize:14,color:checks[item.key]?C.muted:C.text,textDecoration:checks[item.key]?"line-through":"none",transition:"all 0.15s"}}>{item.label}</span>
+            </label>
+          ))}
+          <div style={{marginTop:20,display:"flex",justifyContent:"flex-end",gap:10}}>
+            <XB onClick={onClose}>Close</XB>
+            <PB onClick={onClose} disabled={!allChecked}>✓ Done for the Day</PB>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1813,14 +2553,73 @@ export default function App(){
   const[vitals,setVitals]=useState(INIT_VITALS);
   const[rx,setRx]=useState(INIT_RX);
   const[notes,setNotes]=useState(INIT_NOTES);
+  const[draftNotes,setDraftNotes]=useState({});
   const[messages,setMessages]=useState(INIT_MESSAGES);
   const[settings,setSettings]=useState(INIT_SETTINGS);
+  const[doctorStatus,setDoctorStatus]=useState(INIT_DOCTOR_STATUS);
+  const[reminderLogs,setReminderLogs]=useState(INIT_REMINDER_LOGS);
+  const[blockTimes,setBlockTimes]=useState(INIT_BLOCK_TIMES);
+  const[waitlist,setWaitlist]=useState(INIT_WAITLIST);
+  const[refillRequests,setRefillRequests]=useState(INIT_REFILL_REQUESTS);
+  const[recentPatients,setRecentPatients]=useState([]);
+  const[sidebarCollapsed,setSidebarCollapsed]=useState(false);
+  const[globalSearchOpen,setGlobalSearchOpen]=useState(false);
+  const[openPatientId,setOpenPatientId]=useState(null);
+  const[eodShown,setEodShown]=useState(false);
+  const[eodModal,setEodModal]=useState(false);
+  const[toast,setToast]=useState(null);
+  const[recentDropOpen,setRecentDropOpen]=useState(false);
+  const[pendingFollowUp,setPendingFollowUp]=useState(null);
 
-  if(!user)return<LoginPage onLogin={u=>{setUser(u);setPage("dashboard");}}/>;
+  const showToast=(msg,color="green")=>{
+    setToast({msg,color});
+    setTimeout(()=>setToast(null),3000);
+  };
+
+  const noShowHandler=(id)=>{
+    const a=appts.find(x=>x.id===id);
+    if(!a)return;
+    setAppts(p=>p.map(x=>x.id===id?{...x,status:"no-show"}:x));
+    const dueDate=new Date();dueDate.setDate(dueDate.getDate()+3);
+    const dueStr=dueDate.toISOString().split("T")[0];
+    setRecalls(p=>[...p,{id:Date.now(),patient:a.patient,reason:"No-show — reschedule appointment",due:dueStr,urgency:"medium",doctor:a.doctor||""}]);
+    showToast(`Recall created for ${a.patient}`,"amber");
+  };
+
+  const completeHandler=(id)=>{
+    const a=appts.find(x=>x.id===id);
+    if(!a)return;
+    setAppts(p=>p.map(x=>x.id===id?{...x,status:"completed"}:x));
+    setPendingFollowUp({patient:a.patient,doctor:a.doctor,date:a.date});
+    // EOD check
+    const todayStr=today();
+    const todayAppts=appts.filter(x=>(x.date||"2026-02-25")===todayStr);
+    const allDone=todayAppts.every(x=>x.id===id||x.status==="completed"||x.status==="no-show");
+    if(allDone&&!eodShown&&todayAppts.length>0){setEodModal(true);setEodShown(true);}
+  };
+
+  const onOpenPatient=(patient)=>{
+    setRecentPatients(prev=>{
+      const filtered=prev.filter(p=>p.id!==patient.id);
+      return [patient,...filtered].slice(0,5);
+    });
+  };
+
+  useEffect(()=>{
+    const handler=(e)=>{
+      if(e.key==="/"&&document.activeElement.tagName!=="INPUT"&&document.activeElement.tagName!=="TEXTAREA"){
+        e.preventDefault();setGlobalSearchOpen(true);
+      }
+    };
+    document.addEventListener("keydown",handler);
+    return()=>document.removeEventListener("keydown",handler);
+  },[]);
+
+  if(!user)return<LoginPage onLogin={u=>{setUser(u);setPage("dashboard");setRecentPatients([]);}}/>;
   const p=PERMS[user.role];
   const overdueCount=recalls.filter(r=>r.urgency==="high").length;
+  const pendingRefills=refillRequests.filter(r=>r.status==="pending").length;
 
-  // Count unread messages for the sidebar badge
   const unreadMsgCount = STAFF_LIST
     .filter(s => s.username !== user.username)
     .reduce((sum, contact) => {
@@ -1830,24 +2629,58 @@ export default function App(){
     }, 0);
 
   const pages={
-    dashboard:<Dashboard user={user} setPage={setPage} appts={appts} recalls={recalls}/>,
-    appointments:p.appointments?<ApptsPage user={user} appts={appts} setAppts={setAppts} patients={patients} settings={settings}/>:<Locked/>,
-    flow:p.flow?<PatientFlowPage user={user} appts={appts} setAppts={setAppts}/>:<Locked/>,
-    patients:p.patients?<PatientsPage user={user} patients={patients} setPatients={setPatients} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} recalls={recalls} setRecalls={setRecalls} appts={appts} setAppts={setAppts}/>:<Locked/>,
-    recalls:p.recalls?<RecallsPage recalls={recalls} setRecalls={setRecalls} patients={patients}/>:<Locked/>,
+    dashboard:<Dashboard user={user} setPage={setPage} appts={appts} recalls={recalls} refillRequests={refillRequests}/>,
+    appointments:p.appointments?<ApptsPage user={user} appts={appts} setAppts={setAppts} patients={patients} settings={settings} reminderLogs={reminderLogs} setReminderLogs={setReminderLogs} waitlist={waitlist} setWaitlist={setWaitlist} blockTimes={blockTimes} recalls={recalls} setRecalls={setRecalls} showToast={showToast} noShowHandler={noShowHandler} completeHandler={completeHandler} pendingFollowUp={pendingFollowUp} setPendingFollowUp={setPendingFollowUp}/>:<Locked/>,
+    flow:p.flow?<PatientFlowPage user={user} appts={appts} setAppts={setAppts} doctorStatus={doctorStatus} setDoctorStatus={setDoctorStatus} patients={patients} showToast={showToast} recalls={recalls} setRecalls={setRecalls} noShowHandler={noShowHandler} completeHandler={completeHandler} setPendingFollowUp={setPendingFollowUp} pendingFollowUp={pendingFollowUp}/>:<Locked/>,
+    patients:p.patients?<PatientsPage user={user} patients={patients} setPatients={setPatients} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} draftNotes={draftNotes} setDraftNotes={setDraftNotes} recalls={recalls} setRecalls={setRecalls} appts={appts} setAppts={setAppts} refillRequests={refillRequests} setRefillRequests={setRefillRequests} onOpenPatient={onOpenPatient} openPatientId={openPatientId} setOpenPatientId={setOpenPatientId} setPage={setPage} showToast={showToast}/>:<Locked/>,
+    recalls:p.recalls?<RecallsPage recalls={recalls} setRecalls={setRecalls} patients={patients} appts={appts} setAppts={setAppts} blockTimes={blockTimes}/>:<Locked/>,
     messages:p.messages?<MessagesPage user={user} messages={messages} setMessages={setMessages}/>:<Locked msg="Messaging is not available for your role."/>,
     reports:p.reports?<ReportsPage appts={appts} recalls={recalls} patients={patients}/>:<Locked msg="Reports are restricted to administrators."/>,
+    refills:p.refills?<RefillQueuePage user={user} patients={patients} rx={rx} setRx={setRx} refillRequests={refillRequests} setRefillRequests={setRefillRequests}/>:<Locked msg="Refill queue access is not available for your role."/>,
     admin:p.admin?<AdminPage/>:<Locked msg="Admin panel is restricted to administrators only."/>,
-    settings:p.settings?<SettingsPage user={user} settings={settings} setSettings={setSettings} setPage={setPage}/>:<Locked msg="Settings are restricted to doctors and admins."/>,
+    settings:p.settings?<SettingsPage user={user} settings={settings} setSettings={setSettings} setPage={setPage} blockTimes={blockTimes} setBlockTimes={setBlockTimes}/>:<Locked msg="Settings are restricted to doctors and admins."/>,
   };
   return(
     <div style={{display:"flex",height:"100vh",fontFamily:"'Segoe UI',system-ui,sans-serif",overflow:"hidden"}}>
-      <Sidebar page={page} setPage={setPage} user={user} recallCount={overdueCount} unreadMsgCount={unreadMsgCount}/>
+      {globalSearchOpen&&<GlobalSearch patients={patients} appts={appts} onClose={()=>setGlobalSearchOpen(false)} onSelectPatient={(pt)=>{setOpenPatientId(pt.id);setPage("patients");setGlobalSearchOpen(false);onOpenPatient(pt);}} onSelectAppt={()=>{setPage("appointments");setGlobalSearchOpen(false);}}/>}
+      {eodModal&&<EndOfDayModal onClose={()=>setEodModal(false)}/>}
+      {pendingFollowUp&&<FollowUpModal patient={pendingFollowUp.patient} doctor={pendingFollowUp.doctor} onClose={()=>setPendingFollowUp(null)} onBook={(date)=>{setPendingFollowUp(null);setPage("appointments");}}/>}
+      {toast&&<div style={{position:"fixed",bottom:24,right:24,zIndex:9999,background:toast.color==="green"?C.green:toast.color==="amber"?C.amber:C.red,color:"#fff",borderRadius:10,padding:"12px 20px",fontSize:14,fontWeight:600,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",display:"flex",alignItems:"center",gap:8,minWidth:280}}><span>{toast.color==="green"?"✓":toast.color==="amber"?"⚠":"✗"}</span>{toast.msg}</div>}
+      <Sidebar page={page} setPage={setPage} user={user} recallCount={overdueCount} unreadMsgCount={unreadMsgCount} pendingRefills={pendingRefills} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed}/>
       <main style={{flex:1,overflow:(page==="messages"||page==="flow")?"hidden":"auto",background:C.bg,display:"flex",flexDirection:"column"}}>
-        <div style={{display:"flex",justifyContent:"flex-end",padding:"10px 20px",background:C.surface,borderBottom:`1px solid ${C.border}`,flexShrink:0}}>
-          <button onClick={()=>setUser(null)} style={{fontSize:12,color:C.muted,background:"none",border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",cursor:"pointer"}}>← Switch Role</button>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 20px",background:C.surface,borderBottom:`1px solid ${C.border}`,flexShrink:0,gap:12}}>
+          <button onClick={()=>setUser(null)} style={{fontSize:12,color:C.muted,background:"none",border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",cursor:"pointer",whiteSpace:"nowrap"}}>← Switch Role</button>
+          <button onClick={()=>setGlobalSearchOpen(true)} style={{flex:1,maxWidth:360,padding:"7px 14px",borderRadius:7,border:`1px solid ${C.border}`,background:C.bg,color:C.muted,fontSize:13,cursor:"text",textAlign:"left",display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:14}}>🔍</span>
+            <span>Search patients, appointments…</span>
+            <span style={{marginLeft:"auto",background:C.border,borderRadius:4,padding:"1px 6px",fontSize:11,fontFamily:"monospace"}}>/</span>
+          </button>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            {recentPatients.length>0&&(
+              <div style={{position:"relative"}}>
+                <button onClick={()=>setRecentDropOpen(v=>!v)} style={{fontSize:12,color:C.muted,background:"none",border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+                  Recent <span style={{fontSize:10}}>▾</span>
+                </button>
+                {recentDropOpen&&(
+                  <div style={{position:"absolute",top:"100%",right:0,marginTop:4,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 4px 16px rgba(0,0,0,0.12)",minWidth:200,zIndex:500}}>
+                    {recentPatients.map(pt=>(
+                      <button key={pt.id} onClick={()=>{setOpenPatientId(pt.id);setPage("patients");setRecentDropOpen(false);}} style={{display:"block",width:"100%",padding:"9px 14px",border:"none",background:"none",textAlign:"left",cursor:"pointer",fontSize:13,color:C.text}} onMouseEnter={e=>e.currentTarget.style.background=C.bg} onMouseLeave={e=>e.currentTarget.style.background="none"}>
+                        {pt.first_name} {pt.last_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {user.role==="doctor"&&(
+              <button onClick={()=>setDoctorStatus(prev=>({...prev,[user.name]:!prev[user.name]}))}
+                style={{fontSize:12,fontWeight:700,padding:"5px 12px",borderRadius:6,border:`1px solid ${doctorStatus[user.name]?C.green:C.red}`,background:doctorStatus[user.name]?C.greenBg:C.redBg,color:doctorStatus[user.name]?C.green:C.red,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:8}}>●</span> {doctorStatus[user.name]?"Ready":"Busy"}
+              </button>
+            )}
+          </div>
         </div>
-        <div style={{flex:1,overflow:(page==="messages"||page==="flow")?"hidden":"auto"}}>
+        <div style={{flex:1,overflow:(page==="messages"||page==="flow")?"hidden":"auto"}} onClick={()=>setRecentDropOpen(false)}>
           {pages[page]}
         </div>
       </main>
