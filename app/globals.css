@@ -5,64 +5,89 @@ html, body {
   height: 100%;
 }
 
-/* ── Light mode (default) ── */
+/* ─────────────────────────────────────────────────────────────────────────
+   Med+ design tokens
+   Direction: steady, exact, quietly warm. Neutral graphite surfaces people can
+   look at all day; Med+ blue is the one accent; status colours carry meaning only.
+   Variable names are kept from the old palette so every C.* reference still works.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Light ── */
 :root {
-  --c-bg:       #F4F6FA;
-  --c-surface:  #FFFFFF;
-  --c-border:   #E1E7EF;
-  --c-navy:     #1A2E4A;
-  --c-navymid:  #2563EB;
-  --c-teal:     #0891B2;
-  --c-text:     #0F172A;
-  --c-muted:    #64748B;
-  --c-green:    #16A34A;
-  --c-greenbg:  #F0FDF4;
-  --c-red:      #DC2626;
-  --c-redbg:    #FEF2F2;
-  --c-amber:    #D97706;
-  --c-amberbg:  #FFFBEB;
-  --c-blue:     #2563EB;
-  --c-bluebg:   #EFF6FF;
-  --c-purple:   #7C3AED;
-  --c-purplebg: #F5F3FF;
-  --c-navybg:   #EFF6FF;
-  --c-tealbg:   #F0FDFA;
+  color-scheme: light;
+  /* surfaces */
+  --c-bg:        #F7F7F8;   /* page */
+  --c-surface:   #FFFFFF;   /* card */
+  --c-raised:    #F1F1F3;   /* hover row, input fill, active tab */
+  --c-border:    #E4E4E7;   /* hairline */
+  /* text: primary / secondary / muted */
+  --c-text:      #18181B;
+  --c-text2:     #52525B;
+  --c-muted:     #71717A;   /* 4.8:1 on card, meta and captions only */
+  /* accent: Med+ blue */
+  --c-navymid:   #2563EB;   /* fill (white text 5.2:1) and links */
+  --c-blue:      #2563EB;
+  --c-accent-hover: #1D4ED8;
+  --c-bluebg:    #EEF3FE;
+  --c-navybg:    #EEF3FE;
+  --c-navy:      #18181B;   /* legacy name, no longer used by the login page */
+  --c-on-accent: #FFFFFF;
+  /* status colours, toned to sit inside the neutrals */
+  --c-teal:      #0E7490;  --c-tealbg:   #ECF7F9;
+  --c-green:     #15803D;  --c-greenbg:  #EEF7F1;
+  --c-amber:     #B45309;  --c-amberbg:  #FDF5E9;
+  --c-red:       #DC2626;  --c-redbg:    #FDF0F0;
+  --c-purple:    #6D28D9;  --c-purplebg: #F4F0FD;
+  /* utility */
+  --c-disabled:  #A9BEEA;   /* disabled accent fill */
+  --c-inactive:  #D4D4D8;   /* inactive avatar, off toggle */
+  --c-skeleton:  #EDEDF0;
+  --c-overlay:   rgba(24,24,27,0.40);
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.05);
+  --shadow-lg:   0 8px 24px rgba(0,0,0,0.08);
 }
 
-/* ── Dark mode ── */
+/* ── Dark ── */
 [data-dark] {
-  --c-bg:       #0F172A;
-  --c-surface:  #1E293B;
-  --c-border:   #2D3F55;
-  --c-navy:     #0A1628;
-  --c-navymid:  #3B82F6;
-  --c-teal:     #22D3EE;
-  --c-text:     #F1F5F9;
-  --c-muted:    #94A3B8;
-  --c-green:    #22C55E;
-  --c-greenbg:  #052E16;
-  --c-red:      #F87171;
-  --c-redbg:    #450A0A;
-  --c-amber:    #FBBF24;
-  --c-amberbg:  #1C1000;
-  --c-blue:     #3B82F6;
-  --c-bluebg:   #0C1E3D;
-  --c-purple:   #A78BFA;
-  --c-purplebg: #1E0A3C;
-  --c-navybg:   #0C1E3D;
-  --c-tealbg:   #0A2830;
+  color-scheme: dark;
+  --c-bg:        #141415;
+  --c-surface:   #1B1B1D;
+  --c-raised:    #252528;
+  --c-border:    #2C2C30;
+  --c-text:      #EDEDEF;
+  --c-text2:     #A1A1A8;
+  --c-muted:     #8A8A92;   /* 5.0:1 on card */
+  --c-navymid:   #3B76F0;   /* white text 4.6:1; as text on card 4.4:1 */
+  --c-blue:      #3B76F0;
+  --c-accent-hover: #5287F2;
+  --c-bluebg:    #1A2338;
+  --c-navybg:    #1A2338;
+  --c-navy:      #0F0F10;
+  --c-on-accent: #FFFFFF;
+  --c-teal:      #3BB5CC;  --c-tealbg:   #13272C;
+  --c-green:     #4CC38A;  --c-greenbg:  #142A1F;
+  --c-amber:     #E5A341;  --c-amberbg:  #2D2312;
+  --c-red:       #E5484D;  --c-redbg:    #2E1617;
+  --c-purple:    #A68BEF;  --c-purplebg: #231D35;
+  --c-disabled:  #2D3B5C;
+  --c-inactive:  #3A3A3F;
+  --c-skeleton:  #252528;
+  --c-overlay:   rgba(0,0,0,0.60);
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.30);
+  --shadow-lg:   0 8px 24px rgba(0,0,0,0.45);
+}
+
+html, body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Card shadow system */
-.card-shadow {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
-}
-.card-shadow-md {
-  box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
-}
-.card-shadow-lg {
-  box-shadow: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.05);
-}
+.card-shadow    { box-shadow: var(--shadow-sm); }
+.card-shadow-md { box-shadow: var(--shadow-sm); }
+.card-shadow-lg { box-shadow: var(--shadow-lg); }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -90,3 +115,48 @@ html, body {
   animation: spin 0.6s linear infinite;
   display: inline-block;
 }
+
+/* ── Motion: one easing curve ── */
+:root { --ease: cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+
+/* ── Focus: visible ring for keyboard users ── */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [role="radio"]:focus-visible {
+  outline: 2px solid var(--c-navymid) !important;
+  outline-offset: 2px;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--c-navymid) !important; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 36px; padding: 0 16px; border-radius: 8px;
+  font: 500 14px/1 var(--font-sans), system-ui, sans-serif;
+  cursor: pointer; white-space: nowrap;
+  transition: background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), transform 120ms var(--ease);
+}
+.btn:active:not(:disabled) { transform: scale(0.98); }
+.btn:disabled { cursor: default; }
+.btn-primary { background: var(--c-navymid); color: var(--c-on-accent); border: 1px solid transparent; }
+.btn-primary:hover:not(:disabled) { background: var(--c-accent-hover); }
+.btn-primary:disabled { background: var(--c-disabled); }
+.btn-secondary { background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border); }
+.btn-secondary:hover { background: var(--c-raised); }
+
+.icon-btn { background: transparent; transition: background-color 160ms var(--ease); }
+.icon-btn:hover { background: var(--c-raised); }
+
+/* ── Clickable cards ── */
+.card-link { transition: border-color 160ms var(--ease); }
+.card-link:hover { border-color: var(--c-text2) !important; }
+
+/* ── Login role buttons ── */
+.role-btn { transition: border-color 160ms var(--ease), background-color 160ms var(--ease); }
+.role-btn:hover:not(:disabled) { border-color: var(--c-text2) !important; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; gap: 6px; border-radius: 6px; }
