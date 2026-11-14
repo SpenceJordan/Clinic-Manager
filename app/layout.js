@@ -1,7 +1,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Clinic Manager',
+  title: 'Med+',
   description: 'Clinic management system',
 };
 
