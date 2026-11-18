@@ -166,6 +166,9 @@ Direction changed after a reference dashboard: an operations console. Ink (`#121
   - **Visible:** an "Admin" marker in the profile menu and on the staff list; the list header counts "N with admin access". Clinic settings in Settings follow admin access too.
 - [ ] Save dashboard layouts to the user's account instead of the browser, so they follow the user to other computers (needs a backend; today it's `localStorage`, key `medplus.dashboard.<role>`)
 
+**Bugs fixed 2026-11-18**
+- [x] The open patient chart was a stale copy: a new allergy (or other edit) didn't show on the chart or in printouts until it was closed and reopened. The chart now reads the live patient record.
+
 **Housekeeping**
 - [x] Committed steps 6–7, the dashboard customisation and the spacing fixes as `be259fb` (2026-11-18)
 - [x] `step6-emoji-inventory.md` kept for reference and committed
@@ -180,7 +183,7 @@ Med+ is a front-end demo today: there's no server, and everything lives in memor
 What's in the code now (checked 2026-11-16):
 - [ ] **Logins are fake.** `DEMO_USERS` in `components/App.jsx` holds plain-text passwords, they're shown on the login page, and the check runs in the browser. Real use needs a server with hashed passwords (bcrypt/argon2), sessions or tokens, and password reset.
 - [ ] **Permissions are only enforced in the UI.** `PERMS` hides buttons and pages, but anyone can change browser code. Every permission check has to be repeated on the server.
-- [ ] **Print views insert patient data as raw HTML.** Daily schedule, prescription and patient summary use `w.document.write(...)` with names, notes and allergies dropped straight into the HTML (3 places). A name like `<img onerror=…>` would run code. Escape the values or build the print view with React.
+- [x] **Print views escape patient data** (fixed 2026-11-18). Daily schedule, prescription and patient summary are built with an `html` tagged template that escapes every value, so a name or allergy like `<img onerror=…>` prints as text. Tested in the browser with that string as an allergy: it printed as text and didn't run.
 - [ ] **No data storage or encryption.** Patients, notes and prescriptions reset on refresh. A real backend needs an encrypted database, HTTPS, and backups (the Admin "Run backup" button doesn't do anything yet).
 - [ ] **Audit log isn't trustworthy.** It's kept in browser memory and anyone could edit it. It needs to be written on the server and be append-only.
 - [ ] **No automatic sign-out.** Add an idle timeout or lock screen for shared front-desk computers.

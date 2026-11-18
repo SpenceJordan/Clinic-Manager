@@ -309,6 +309,15 @@ const INIT_MESSAGES = {
   ],
 };
 
+// Print views are built as HTML strings. html`...` escapes every value put into it, so a name like
+// <img onerror=...> prints as text instead of running. Nested html`` pieces and arrays of them are kept as markup.
+const MARKUP=Symbol("markup");
+const escHtml=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+const htmlPart=v=>Array.isArray(v)?v.map(htmlPart).join(""):(v&&v[MARKUP]!==undefined?v[MARKUP]:escHtml(v));
+function html(strings,...vals){
+  const out=strings.reduce((acc,str,i)=>acc+str+(i<vals.length?htmlPart(vals[i]):""),"");
+  return{[MARKUP]:out,toString:()=>out};
+}
 const PERMS = {
   admin:        { appointments:true,  patients:true,  vitals:false, viewVitals:true,  notes:false, prescriptions:false, viewRx:true,  writeRx:false, viewNotes:true,  writeNotes:false, recalls:true, admin:true,  settings:true,  messages:true, flow:true, reports:true,  refills:true,  refillApprove:false, tasks:true, inventory:true,  staffSchedule:true  , registerPatients:true,  createTasks:true, customiseDashboard:true },
   doctor:       { appointments:true,  patients:true,  vitals:true,  viewVitals:true,  notes:true,  prescriptions:true,  viewRx:true,  writeRx:true,  viewNotes:true,  writeNotes:true,  recalls:true, admin:false, settings:true,  messages:true, flow:true, reports:false, refills:true,  refillApprove:true,  tasks:true, inventory:false, staffSchedule:false , registerPatients:false, createTasks:true, customiseDashboard:true },
@@ -2503,14 +2512,14 @@ function ApptsPage({user,appts,setAppts,patients,settings,reminderLogs,setRemind
     const grouped = {};
     dayAppts.forEach(a=>{if(!grouped[a.doctor])grouped[a.doctor]=[];grouped[a.doctor].push(a);});
     const clinicName = (settings||{}).clinicName||"Clinic Manager";
-    const rows = Object.entries(grouped).map(([doc,apts])=>`
+    const rows = Object.entries(grouped).map(([doc,apts])=>html`
       <h3 style="margin:16px 0 8px;font-size:14px;">${doc}</h3>
       <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">
         <tr style="background:#f0f2f5;"><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Time</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Patient</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Type</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Dur.</th><th style="padding:6px 10px;text-align:left;border:1px solid #ddd;">Notes</th></tr>
-        ${apts.map(a=>`<tr><td style="padding:6px 10px;border:1px solid #ddd;">${a.time}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.patient}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.type.replace(/-/g," ")}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.duration}m</td><td style="padding:6px 10px;border:1px solid #ddd;min-width:120px;"></td></tr>`).join("")}
-      </table>`).join("");
+        ${apts.map(a=>html`<tr><td style="padding:6px 10px;border:1px solid #ddd;">${a.time}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.patient}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.type.replace(/-/g," ")}</td><td style="padding:6px 10px;border:1px solid #ddd;">${a.duration}m</td><td style="padding:6px 10px;border:1px solid #ddd;min-width:120px;"></td></tr>`)}
+      </table>`);
     const w=window.open("","_blank");
-    w.document.write(`<!DOCTYPE html><html><head><title>Daily Schedule</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#000;}h1{font-size:18px;margin-bottom:4px;}@media print{button{display:none;}}</style></head><body><h1>${clinicName} — Daily Schedule</h1><p style="margin:0 0 16px;font-size:13px;">${new Date(selectedDate+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>${rows}<button onclick="window.print()" style="padding:8px 16px;margin-top:8px;">Print</button></body></html>`);
+    w.document.write(String(html`<!DOCTYPE html><html><head><title>Daily Schedule</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#000;}h1{font-size:18px;margin-bottom:4px;}@media print{button{display:none;}}</style></head><body><h1>${clinicName} — Daily Schedule</h1><p style="margin:0 0 16px;font-size:13px;">${new Date(selectedDate+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</p>${rows}<button onclick="window.print()" style="padding:8px 16px;margin-top:8px;">Print</button></body></html>`));
     w.document.close();
     setTimeout(()=>w.print(),400);
   };
@@ -3214,27 +3223,27 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
   };
   const printRx=()=>{
     const w=window.open("","_blank","width=720,height=900");
-    w.document.write(`<html><head><title>Prescription</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#1A2332}.header{border-bottom:2px solid #1A3A5C;padding-bottom:16px;margin-bottom:24px}.clinic{font-size:20px;font-weight:bold;color:#1A3A5C}.rx-item{border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:12px}.med{font-size:16px;font-weight:bold}.footer{margin-top:48px;border-top:1px solid #ddd;padding-top:16px}.sig{border-bottom:1px solid #000;width:260px;margin-top:36px}@media print{body{margin:20px}}</style></head><body>
+    w.document.write(String(html`<html><head><title>Prescription</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#1A2332}.header{border-bottom:2px solid #1A3A5C;padding-bottom:16px;margin-bottom:24px}.clinic{font-size:20px;font-weight:bold;color:#1A3A5C}.rx-item{border:1px solid #ddd;border-radius:6px;padding:14px;margin-bottom:12px}.med{font-size:16px;font-weight:bold}.footer{margin-top:48px;border-top:1px solid #ddd;padding-top:16px}.sig{border-bottom:1px solid #000;width:260px;margin-top:36px}@media print{body{margin:20px}}</style></head><body>
     <div class="header"><div class="clinic">My Medical Clinic</div><div style="color:#6B7A8D;font-size:13px">123 Main St · (555) 000-0000</div></div>
     <div style="margin-bottom:16px"><strong>Patient:</strong> ${patient.first_name} ${patient.last_name} &nbsp;·&nbsp; <strong>DOB:</strong> ${patient.dob} &nbsp;·&nbsp; <strong>Date:</strong> ${today()}</div>
-    ${rxs.map(rx=>`<div class="rx-item"><div class="med">℞ ${rx.med} ${rx.dose}</div><div style="margin:6px 0;color:#6B7A8D">${rx.sig}</div><div style="font-size:12px;color:#6B7A8D">Refills: ${rx.refills} &nbsp;·&nbsp; Prescribed: ${rx.date||""}</div></div>`).join("")}
+    ${rxs.map(rx=>html`<div class="rx-item"><div class="med">℞ ${rx.med} ${rx.dose}</div><div style="margin:6px 0;color:#6B7A8D">${rx.sig}</div><div style="font-size:12px;color:#6B7A8D">Refills: ${rx.refills} &nbsp;·&nbsp; Prescribed: ${rx.date||""}</div></div>`)}
     <div class="footer"><div>Prescribing Physician: <strong>Dr. Priya Patel, MD</strong></div><div class="sig"></div><div style="margin-top:6px;font-size:12px;color:#6B7A8D">Signature</div></div>
-    </body></html>`);
+    </body></html>`));
     w.document.close();w.focus();setTimeout(()=>w.print(),300);
   };
   const printSummary=()=>{
     const w=window.open("","_blank","width=720,height=900");
     const vitArr=vitals[patient.id]||[];
     const vit=vitArr.length>0?vitArr[vitArr.length-1]:null;
-    w.document.write(`<html><head><title>Patient Summary</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#1A2332}h2{color:#1A3A5C}table{width:100%;border-collapse:collapse;margin-bottom:20px}td,th{padding:8px 12px;border:1px solid #ddd;font-size:13px}th{background:#F0F2F5;font-weight:600}.section{margin-bottom:24px}@media print{body{margin:20px}}</style></head><body>
+    w.document.write(String(html`<html><head><title>Patient Summary</title><style>body{font-family:Arial,sans-serif;margin:40px;color:#1A2332}h2{color:#1A3A5C}table{width:100%;border-collapse:collapse;margin-bottom:20px}td,th{padding:8px 12px;border:1px solid #ddd;font-size:13px}th{background:#F0F2F5;font-weight:600}.section{margin-bottom:24px}@media print{body{margin:20px}}</style></head><body>
     <h2>My Medical Clinic — Patient Summary</h2>
     <p style="color:#6B7A8D;font-size:13px">Generated: ${today()} &nbsp;·&nbsp; For referral or internal use only</p>
     <div class="section"><h3>Demographics</h3><table><tr><th>Name</th><td>${patient.first_name} ${patient.last_name}</td><th>DOB</th><td>${patient.dob}</td></tr><tr><th>Phone</th><td>${patient.phone}</td><th>Insurance</th><td>${patient.insurance}</td></tr></table></div>
     <div class="section"><h3>Allergies</h3><p>${patient.allergies.length?patient.allergies.join(", "):"No known allergies"}</p></div>
-    ${vit?`<div class="section"><h3>Most Recent Vitals</h3><table><tr><th>BP</th><td>${vit.bp} mmHg</td><th>HR</th><td>${vit.hr} bpm</td></tr><tr><th>Temp</th><td>${vit.temp} °F</td><th>O₂ Sat</th><td>${vit.o2}%</td></tr><tr><th>Weight</th><td>${vit.weight} lbs</td><th>BMI</th><td>${vit.bmi}</td></tr></table></div>`:""}
-    ${rxs.length?`<div class="section"><h3>Active Medications</h3><table><tr><th>Medication</th><th>Dose</th><th>Instructions</th><th>Refills</th></tr>${rxs.map(r=>`<tr><td>${r.med}</td><td>${r.dose}</td><td>${r.sig}</td><td>${r.refills}</td></tr>`).join("")}</table></div>`:""}
-    ${recalls.filter(r=>r.patient===`${patient.first_name} ${patient.last_name}`).length?`<div class="section"><h3>Open Recalls</h3><table><tr><th>Reason</th><th>Due Date</th><th>Urgency</th></tr>${recalls.filter(r=>r.patient===`${patient.first_name} ${patient.last_name}`).map(r=>`<tr><td>${r.reason}</td><td>${r.due}</td><td>${r.urgency}</td></tr>`).join("")}</table></div>`:""}
-    </body></html>`);
+    ${vit?html`<div class="section"><h3>Most Recent Vitals</h3><table><tr><th>BP</th><td>${vit.bp} mmHg</td><th>HR</th><td>${vit.hr} bpm</td></tr><tr><th>Temp</th><td>${vit.temp} °F</td><th>O₂ Sat</th><td>${vit.o2}%</td></tr><tr><th>Weight</th><td>${vit.weight} lbs</td><th>BMI</th><td>${vit.bmi}</td></tr></table></div>`:""}
+    ${rxs.length?html`<div class="section"><h3>Active Medications</h3><table><tr><th>Medication</th><th>Dose</th><th>Instructions</th><th>Refills</th></tr>${rxs.map(r=>html`<tr><td>${r.med}</td><td>${r.dose}</td><td>${r.sig}</td><td>${r.refills}</td></tr>`)}</table></div>`:""}
+    ${recalls.filter(r=>r.patient===`${patient.first_name} ${patient.last_name}`).length?html`<div class="section"><h3>Open Recalls</h3><table><tr><th>Reason</th><th>Due Date</th><th>Urgency</th></tr>${recalls.filter(r=>r.patient===`${patient.first_name} ${patient.last_name}`).map(r=>html`<tr><td>${r.reason}</td><td>${r.due}</td><td>${r.urgency}</td></tr>`)}</table></div>`:""}
+    </body></html>`));
     w.document.close();w.focus();setTimeout(()=>w.print(),300);
   };
   return(
@@ -3897,7 +3906,9 @@ function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes
     if(sortBy==="risk")return computeRisk(b,rx,vitals,INIT_LABS,appts||[])-computeRisk(a,rx,vitals,INIT_LABS,appts||[]);
     return 0;
   });
-  if(sel)return<div key={sel.id} style={{animation:"rise 220ms var(--ease)"}}><PatientProfile patient={sel} onBack={()=>setSel(null)} user={user} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} recalls={recalls} setRecalls={setRecalls} patients={patients} setPatients={setPatients} draftNotes={draftNotes||{}} setDraftNotes={setDraftNotes} refillRequests={refillRequests} setRefillRequests={setRefillRequests} onOpenPatient={onOpenPatient} appts={appts} addAudit={addAudit}/></div>;
+  // Read the open chart from the live list, so edits (allergies, details) show straight away
+  const selLive=sel&&(patients.find(p=>p.id===sel.id)||sel);
+  if(sel)return<div key={sel.id} style={{animation:"rise 220ms var(--ease)"}}><PatientProfile patient={selLive} onBack={()=>setSel(null)} user={user} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} recalls={recalls} setRecalls={setRecalls} patients={patients} setPatients={setPatients} draftNotes={draftNotes||{}} setDraftNotes={setDraftNotes} refillRequests={refillRequests} setRefillRequests={setRefillRequests} onOpenPatient={onOpenPatient} appts={appts} addAudit={addAudit}/></div>;
   return(
     <div style={{padding:"24px 32px 48px",maxWidth:1440}}>
       {showNew&&<NewPatientModal onClose={()=>setShowNew(false)} onSave={p=>{setPatients(prev=>[...prev,p]);setShowNew(false);}}/>}
