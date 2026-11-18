@@ -158,8 +158,8 @@ Direction changed after a reference dashboard: an operations console. Ink (`#121
 - [ ] Save dashboard layouts to the user's account instead of the browser, so they follow the user to other computers (needs a backend; today it's `localStorage`, key `medplus.dashboard.<role>`)
 
 **Housekeeping**
-- [ ] Commit the step 6 work, the dashboard customisation and the spacing fixes (nothing is committed since `db0bb21`)
-- [ ] Decide what to do with `step6-emoji-inventory.md` (untracked; all emoji in it are now replaced): delete it or keep it for reference
+- [x] Committed steps 6–7, the dashboard customisation and the spacing fixes as `be259fb` (2026-11-18)
+- [x] `step6-emoji-inventory.md` kept for reference and committed
 - Note: don't run `next build` in the project folder while `npm run dev` is running. It overwrites `.next` and breaks the dev server (fix: stop it, `rm -rf .next`, `npm run dev`).
 
 ---
@@ -194,7 +194,7 @@ Suggested routine: `/init` once, `/run` while working, `/code-review` before eac
 ---
 
 ## Git
-- Work is on the local branch **`ui-redesign`** (commit `db0bb21` plus uncommitted changes since). **Not pushed and not merged into `main`.**
+- Work is on the local branch **`ui-redesign`** (latest commit `be259fb`, everything committed). **Not pushed and not merged into `main`.**
 - Back it up: `git push -u origin ui-redesign`
 - Put it on main when you're happy: `git checkout main && git merge ui-redesign`
 
