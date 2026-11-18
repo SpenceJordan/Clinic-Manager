@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
-import { Plus, Search, Mail, ChevronDown, ChevronUp, ChevronLeft, Settings, LogOut, LayoutDashboard, CalendarDays, Columns3, Users, Pill, BellRing, ChartColumn, ListChecks, Package, CalendarClock, ShieldCheck, Briefcase, Stethoscope, HeartPulse, CalendarCheck, MessageSquare, Maximize2, Minimize2, ArrowUp, TriangleAlert, ArrowRight, Check, Timer, BellRing as Bell, ClipboardList, CalendarX2, X, Lock, ChevronRight, CircleAlert, CircleCheck, Ellipsis, UserRound, Activity, ClipboardCheck, Clock, Printer, FileText, FolderOpen, Phone, Ban, ScanLine, Moon, NotebookPen, ArrowLeft, List, CalendarRange, Hourglass, CalendarPlus, Info, GripVertical, Eye, EyeOff, ArrowDown, ArrowLeftRight, SlidersHorizontal, RotateCcw } from "lucide-react";
+import { Plus, Search, Mail, ChevronDown, ChevronUp, ChevronLeft, Settings, LogOut, LayoutDashboard, CalendarDays, Columns3, Users, Pill, BellRing, ChartColumn, ListChecks, Package, CalendarClock, ShieldCheck, Briefcase, Stethoscope, HeartPulse, CalendarCheck, MessageSquare, Maximize2, Minimize2, ArrowUp, TriangleAlert, ArrowRight, Check, Timer, BellRing as Bell, ClipboardList, CalendarX2, X, Lock, ChevronRight, CircleAlert, CircleCheck, Ellipsis, UserRound, Activity, ClipboardCheck, Clock, Printer, FileText, FolderOpen, Phone, Ban, ScanLine, Moon, NotebookPen, ArrowLeft, List, CalendarRange, Hourglass, CalendarPlus, Info, GripVertical, Eye, EyeOff, ArrowDown, ArrowLeftRight, SlidersHorizontal, RotateCcw, Database, ScrollText, UserCog } from "lucide-react";
 
 const ROLE_LABEL = { admin:"Office admin", doctor:"Doctor", nurse:"Nurse", receptionist:"Receptionist" };
 const INIT_PATIENTS = [
@@ -320,7 +320,7 @@ const PERM_GROUPS=[
   {label:"Pages",items:[
     ["appointments","Appointments"],["flow","Patient flow"],["patients","Patients"],["refills","Refill queue"],["recalls","Recalls"],
     ["tasks","Tasks"],["inventory","Inventory"],["reports","Reports"],["staffSchedule","Staff schedule"],["messages","Messages"],
-    ["settings","Settings"],["admin","Admin panel","Accounts, permissions, audit log"],
+    ["settings","Settings"],
   ]},
   {label:"Clinical",items:[
     ["viewVitals","See vitals"],["vitals","Record vitals and allergies"],
@@ -333,6 +333,11 @@ const PERM_GROUPS=[
     ["customiseDashboard","Customise their dashboard"],
   ]},
 ];
+// Admin access is one switch on any account. Office admins have it as their job (admin pages in the sidebar);
+// anyone else gets a separate "Manage clinic" area from the profile menu, so their working sidebar stays the same.
+const hasAdmin=a=>!!a&&a.status==="active"&&permsFor(a).admin;
+const isAdminAddOn=a=>!!a&&a.role!=="admin"&&permsFor(a).admin;
+const AdminMark=()=><span title="Has admin access" style={{display:"inline-flex",alignItems:"center",gap:4,height:18,padding:"0 6px",borderRadius:4,fontSize:11,fontWeight:500,color:C.text,background:C.raised,border:`1px solid ${C.border}`,verticalAlign:"middle"}}><ShieldCheck size={11} strokeWidth={2} aria-hidden="true"/>Admin</span>;
 // A write permission needs its read permission; switching one changes the other
 const PERM_NEEDS={vitals:"viewVitals",writeNotes:"viewNotes",writeRx:"viewRx",refillApprove:"refills"};
 const roleDefaults=role=>PERMS[role]||PERMS.receptionist;
@@ -340,6 +345,7 @@ const roleDefaults=role=>PERMS[role]||PERMS.receptionist;
 function permsFor(user){
   const p={...roleDefaults(user?.role),...(user?.perms||{})};
   Object.entries(PERM_NEEDS).forEach(([w,r])=>{if(p[w])p[r]=true;});
+  if(user?.role==="admin")p.admin=true;   // the office admin role is the admin job
   p.prescriptions=p.writeRx; p.notes=p.writeNotes;   // older keys still read in the chart
   return p;
 }
@@ -361,7 +367,7 @@ const C = {
 const RC = { admin:{bg:C.purpleBg,fg:C.purple}, doctor:{bg:C.blueBg,fg:C.blue}, nurse:{bg:C.greenBg,fg:C.green}, receptionist:{bg:C.amberBg,fg:C.amber} };
 // Line icons (lucide): one set, 16px, 1.5 stroke, coloured by their text role
 const ROLE_ICON = { admin:Briefcase, doctor:Stethoscope, nurse:HeartPulse, receptionist:CalendarCheck };
-const NAV_ICON = { dashboard:LayoutDashboard, appointments:CalendarDays, flow:Columns3, patients:Users, refills:Pill, recalls:BellRing, reports:ChartColumn, tasks:ListChecks, inventory:Package, staffschedule:CalendarClock, admin:ShieldCheck };
+const NAV_ICON = { dashboard:LayoutDashboard, appointments:CalendarDays, flow:Columns3, patients:Users, refills:Pill, recalls:BellRing, reports:ChartColumn, tasks:ListChecks, inventory:Package, staffschedule:CalendarClock, admin:ShieldCheck, overview:LayoutDashboard, accounts:UserCog, audit:ScrollText, backup:Database };
 const Icon=({as:I,size=16,style})=><I size={size} strokeWidth={1.5} aria-hidden="true" style={{flexShrink:0,...style}}/>;
 // Logo: a flat plus in ink next to the wordmark. No gradient, no glow.
 const Logo=({size=28,wordSize=16,color})=>(
@@ -1451,7 +1457,7 @@ function RecallModal({onClose,onSave,patients}){
 }
 
 // ─── App shell: sidebar + header ─────────────────────────────────────────────
-const PAGE_LABEL={dashboard:"Dashboard",appointments:"Appointments",flow:"Patient flow",patients:"Patients",refills:"Refill queue",recalls:"Recalls",reports:"Reports",tasks:"Tasks",inventory:"Inventory",staffschedule:"Staff schedule",admin:"Admin panel",settings:"Settings",messages:"Messages"};
+const PAGE_LABEL={overview:"Overview",accounts:"Staff and accounts",audit:"Audit log",backup:"Backup",dashboard:"Dashboard",appointments:"Appointments",flow:"Patient flow",patients:"Patients",refills:"Refill queue",recalls:"Recalls",reports:"Reports",tasks:"Tasks",inventory:"Inventory",staffschedule:"Staff schedule",admin:"Admin panel",settings:"Settings",messages:"Messages"};
 // Nav grouped by what each role does all day. Admin (office admin) leads with operations.
 const NAV_GROUPS={
   admin:[
@@ -1462,16 +1468,25 @@ const NAV_GROUPS={
   default:[
     {label:null,      ids:["dashboard","flow","appointments"]},
     {label:"Patients",  ids:["patients","refills","recalls"]},
-    {label:"Work",      ids:["tasks","inventory","staffschedule","reports","admin"]},
+    {label:"Work",      ids:["tasks","inventory","staffschedule","reports"]},
   ],
 };
+// The "Manage clinic" area for accounts with admin access on top of their own role
+const MANAGE_NAV=[
+  {label:null,     ids:["overview"]},
+  {label:"People", ids:["accounts","staffschedule"]},
+  {label:"Clinic", ids:["reports","inventory"]},
+  {label:"Records",ids:["audit","backup"]},
+];
+const MANAGE_ONLY=["overview","accounts","audit","backup"], MANAGE_SHARED=["staffschedule","reports","inventory"];
 const initials=name=>name.split(" ").filter(w=>!w.startsWith("Dr")).map(w=>w[0]).join("").slice(0,2);
 
-function Sidebar({page,setPage,user,recallCount,pendingRefills,onLogout}){
+function Sidebar({page,setPage,user,recallCount,pendingRefills,onLogout,managing,onManage,onBackToWork}){
   const p=permsFor(user);
   const show={dashboard:true,appointments:p.appointments,flow:p.flow,patients:p.patients,refills:p.refills,recalls:p.recalls,reports:p.reports,tasks:p.tasks,inventory:p.inventory,staffschedule:p.staffSchedule,admin:p.admin};
   const badge={refills:p.refillApprove?pendingRefills:0,recalls:recallCount};
-  const groups=(NAV_GROUPS[user.role]||NAV_GROUPS.default).map(g=>({...g,ids:g.ids.filter(id=>show[id])})).filter(g=>g.ids.length);
+  const groups=managing?MANAGE_NAV:(NAV_GROUPS[user.role]||NAV_GROUPS.default).map(g=>({...g,ids:g.ids.filter(id=>show[id])})).filter(g=>g.ids.length);
+  const addOn=isAdminAddOn(user);
   const[profileOpen,setProfileOpen]=useState(false);
   const profileRef=useRef(null);
   useEffect(()=>{
@@ -1484,6 +1499,12 @@ function Sidebar({page,setPage,user,recallCount,pendingRefills,onLogout}){
     <nav aria-label="Main" style={{width:232,flexShrink:0,background:C.surface,borderRight:`1px solid ${C.border}`,display:"flex",flexDirection:"column",height:"100%"}}>
       <div style={{height:56,display:"flex",alignItems:"center",padding:"0 24px",flexShrink:0}}><Logo/></div>
       <div style={{flex:1,overflowY:"auto",padding:"8px 12px 12px"}}>
+        {managing&&(
+          <div style={{marginBottom:16}}>
+            <button className="nav-item" onClick={onBackToWork}><Icon as={ArrowLeft} size={18}/><span style={{flex:1}}>Back to my work</span></button>
+            <div style={{display:"flex",alignItems:"center",gap:8,padding:"16px 12px 0",fontSize:13,fontWeight:600,color:C.text}}><ShieldCheck size={16} strokeWidth={1.5} aria-hidden="true"/>Manage clinic</div>
+          </div>
+        )}
         {groups.map((g,gi)=>(
           <div key={gi} style={{marginTop:gi?20:0}}>
             {g.label&&<div style={{fontSize:12,color:C.muted,padding:"0 12px 6px"}}>{g.label}</div>}
@@ -1502,7 +1523,10 @@ function Sidebar({page,setPage,user,recallCount,pendingRefills,onLogout}){
       <div ref={profileRef} style={{position:"relative",padding:12,borderTop:`1px solid ${C.border}`}}>
         {profileOpen&&(
           <div role="menu" style={{position:"absolute",bottom:"calc(100% - 4px)",left:12,right:12,background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"var(--shadow-lg)",padding:6,zIndex:500,animation:"rise 160ms var(--ease)"}}>
-            <div style={{padding:"8px 10px 10px",borderBottom:`1px solid ${C.border}`,marginBottom:6,display:"flex",alignItems:"center",gap:8,fontSize:12,color:C.text2}}><Icon as={ROLE_ICON[user.role]} size={14}/>{ROLE_LABEL[user.role]||user.role} account</div>
+            <div style={{padding:"8px 10px 10px",borderBottom:`1px solid ${C.border}`,marginBottom:6,display:"flex",alignItems:"center",gap:8,fontSize:12,color:C.text2}}><Icon as={ROLE_ICON[user.role]} size={14}/><span style={{flex:1}}>{ROLE_LABEL[user.role]||user.role} account</span>{addOn&&<AdminMark/>}</div>
+            {addOn&&(managing
+              ?<button role="menuitem" className="icon-btn" onClick={()=>{setProfileOpen(false);onBackToWork();}} style={menuItem}><Icon as={ArrowLeft}/> Back to my work</button>
+              :<button role="menuitem" className="icon-btn" onClick={()=>{setProfileOpen(false);onManage();}} style={menuItem}><Icon as={ShieldCheck}/> Manage clinic</button>)}
             {p.settings&&<button role="menuitem" className="icon-btn" onClick={()=>{setPage("settings");setProfileOpen(false);}} style={menuItem}><Icon as={Settings}/> Settings</button>}
             <button role="menuitem" className="icon-btn" onClick={()=>{setProfileOpen(false);onLogout();}} style={menuItem}><Icon as={LogOut}/> Log out</button>
           </div>
@@ -1520,7 +1544,7 @@ function Sidebar({page,setPage,user,recallCount,pendingRefills,onLogout}){
   );
 }
 
-function TopBar({page,clinicName,onSearchClick,onMessagesClick,unreadMsgCount,canMessage,recentPatients,onOpenRecent,doctorReady,onToggleReady}){
+function TopBar({page,area,clinicName,onSearchClick,onMessagesClick,unreadMsgCount,canMessage,recentPatients,onOpenRecent,doctorReady,onToggleReady}){
   const[recentOpen,setRecentOpen]=useState(false);
   const ref=useRef(null);
   useEffect(()=>{
@@ -1532,7 +1556,7 @@ function TopBar({page,clinicName,onSearchClick,onMessagesClick,unreadMsgCount,ca
   return(
     <header style={{height:56,flexShrink:0,display:"flex",alignItems:"center",gap:12,padding:"0 32px",borderBottom:`1px solid ${C.border}`,background:C.bg}}>
       <div aria-label="Breadcrumb" style={{display:"flex",alignItems:"center",gap:8,fontSize:13,minWidth:0,flex:1}}>
-        <span style={{color:C.muted,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{clinicName}</span>
+        <span style={{color:C.muted,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{area||clinicName}</span>
         <span aria-hidden="true" style={{color:C.border2}}>/</span>
         <span style={{color:C.text,fontWeight:500,whiteSpace:"nowrap"}}>{PAGE_LABEL[page]||page}</span>
       </div>
@@ -1818,9 +1842,9 @@ function DashboardLayout({storageKey,legacyKey,canCustomise=true,panels,defaults
   );
 }
 
-function Dashboard({user,setPage,appts,recalls,refillRequests,inventory=[],staffSchedule=[],tasks=[],patients=[]}){
+function Dashboard({user,view,setPage,appts,recalls,refillRequests,inventory=[],staffSchedule=[],tasks=[],patients=[]}){
   const STAFF_LIST=useStaff();
-  const r=user.role;
+  const r=view||user.role;
   const TODAY=DEMO_TODAY, NOW=DEMO_NOW;
   const todayAppts=appts.filter(a=>(a.date||TODAY)===TODAY).sort((a,b)=>a.time.localeCompare(b.time));
   const onShift=staffSchedule.filter(s=>s.date===TODAY);
@@ -1835,11 +1859,11 @@ function Dashboard({user,setPage,appts,recalls,refillRequests,inventory=[],staff
   const nextUp=todayAppts.find(a=>a.status==="scheduled"&&toMin(a.time)>=toMin(NOW));
   const longestWait=Math.max(0,...inClinic.filter(a=>a.stageEnteredAt).map(a=>toMin(NOW)-toMin(a.stageEnteredAt.slice(11))));
   const dayHeader=(sub,actions)=><DashHeader date={TODAY} sub={sub} actions={actions}/>;
-  const dashKey=`medplus.dashboard.user.${user.username}`, canCustomise=permsFor(user).customiseDashboard!==false;
+  const dashKey=`medplus.dashboard.user.${user.username}${r!==user.role?`.${r}`:""}`, canCustomise=permsFor(user).customiseDashboard!==false;
 
   // Every role's dashboard is a set of panels; DashboardLayout lets each account arrange its own
   const roleDash=(defaults,panels,sub,actions,alert)=>(
-    <DashboardLayout storageKey={dashKey} legacyKey={`medplus.dashboard.${r}`} canCustomise={canCustomise} panels={panels} defaults={defaults}
+    <DashboardLayout storageKey={dashKey} legacyKey={r===user.role?`medplus.dashboard.${r}`:undefined} canCustomise={canCustomise} panels={panels} defaults={defaults}
       header={customize=>(<>{dayHeader(sub,<>{customize}{actions}</>)}{alert}</>)}/>
   );
 
@@ -1997,7 +2021,7 @@ function Dashboard({user,setPage,appts,recalls,refillRequests,inventory=[],staff
     )},
   };
   return(
-    <DashboardLayout storageKey={dashKey} legacyKey={`medplus.dashboard.${r}`} canCustomise={canCustomise} panels={panels} defaults={ADMIN_DASH_DEFAULT}
+    <DashboardLayout storageKey={dashKey} legacyKey={r===user.role?`medplus.dashboard.${r}`:undefined} canCustomise={canCustomise} panels={panels} defaults={ADMIN_DASH_DEFAULT}
       header={customize=>(<>
       <PageHeader title={new Date(TODAY+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}
         status={<Badge color={attention?"amber":"green"}>{attention?`${attention} need${attention===1?"s":""} attention`:"Running smoothly"}</Badge>}
@@ -4100,21 +4124,21 @@ function RecallsPage({recalls,setRecalls,patients,appts,setAppts,blockTimes}){
   );
 }
 
-const changedPerms=a=>Object.keys(a.perms||{}).filter(k=>a.perms[k]!==roleDefaults(a.role)[k]).length;
+const changedPerms=a=>Object.keys(a.perms||{}).filter(k=>k!=="admin"&&a.perms[k]!==roleDefaults(a.role)[k]).length;
 
 function UsersTab({accounts,user,onAdd,onEdit}){
   const th={padding:"12px 16px 8px",textAlign:"left",fontSize:12,fontWeight:400,color:C.muted,borderBottom:`1px solid ${C.border}`};
   const td={padding:"12px 16px",fontSize:13,color:C.text2};
   return(
     <Card>
-      <CardHead title="Staff users" meta={`${accounts.length} accounts`}><button className="btn btn-primary btn-sm" onClick={onAdd}><Icon as={Plus} size={14}/>Add user</button></CardHead>
+      <CardHead title="Staff users" meta={`${accounts.length} accounts · ${accounts.filter(hasAdmin).length} with admin access`}><button className="btn btn-primary btn-sm" onClick={onAdd}><Icon as={Plus} size={14}/>Add user</button></CardHead>
       <table className="tbl" style={{width:"100%",borderCollapse:"collapse"}}>
         <thead><tr>{["Name","Username","Role","Access","Status","Last sign-in",""].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
         <tbody>{accounts.map((a,i)=>{const n=changedPerms(a);return(
           <tr key={a.id} className="row-link" onClick={()=>onEdit(a)} style={{borderBottom:i<accounts.length-1?`1px solid ${C.border}`:"none"}}>
             <td style={{...td,color:C.text,fontWeight:500}}>{a.name}{a.id===user?.id&&<span style={{color:C.muted,fontWeight:400}}> (you)</span>}<div style={{fontSize:12,color:C.muted,fontWeight:400,marginTop:2}}>{a.title}</div></td>
             <td style={{...td,fontFamily:C.mono,fontSize:12,color:C.muted}}>{a.username}</td>
-            <td style={td}>{ROLE_LABEL[a.role]}</td>
+            <td style={td}><span style={{display:"inline-flex",alignItems:"center",gap:8}}>{ROLE_LABEL[a.role]}{isAdminAddOn(a)&&<AdminMark/>}</span></td>
             <td style={td}>{n?<Badge color="amber">{n} custom</Badge>:<span style={{color:C.muted}}>Role default</span>}</td>
             <td style={td}><Badge color={a.status==="active"?"green":"neutral"}>{a.status==="active"?"Active":"Inactive"}</Badge></td>
             <td style={{...td,fontFamily:C.mono,fontVariantNumeric:"tabular-nums"}}>{a.lastLogin||"Never"}</td>
@@ -4136,10 +4160,10 @@ function AccountModal({account,accounts,self,onSave,onClose}){
     // keep read/write pairs consistent
     Object.entries(PERM_NEEDS).forEach(([w,r])=>{if(key===w&&on)next[r]=true;if(key===r&&!on)next[w]=false;});
     const d=roleDefaults(x.role),perms={};
-    PERM_GROUPS.flatMap(g=>g.items).forEach(([k])=>{if(!!next[k]!==!!d[k])perms[k]=!!next[k];});
+    [...PERM_GROUPS.flatMap(g=>g.items).map(([k])=>k),"admin"].forEach(k=>{if(!!next[k]!==!!d[k])perms[k]=!!next[k];});
     return{...x,perms};
   });
-  const nCustom=Object.keys(f.perms||{}).length;
+  const nCustom=Object.keys(f.perms||{}).filter(k=>k!=="admin").length;
   const save=()=>{
     const username=f.username.trim().toLowerCase();
     if(!f.name.trim()||!username)return setErr("Name and username are required");
@@ -4147,6 +4171,10 @@ function AccountModal({account,accounts,self,onSave,onClose}){
     if(accounts.some(a=>a.username===username&&a.id!==account?.id))return setErr(`The username "${username}" is already taken`);
     if(isNew&&f.password.length<8)return setErr("Password needs at least 8 characters");
     if(!isNew&&f.password&&f.password.length<8)return setErr("New password needs at least 8 characters");
+    // Never zero admins: the last active account with admin access keeps it
+    const othersWithAdmin=accounts.filter(a=>a.id!==account?.id&&hasAdmin(a)).length;
+    if(account&&hasAdmin(account)&&!hasAdmin(f)&&othersWithAdmin===0)
+      return setErr(`${account.name} is the only account with admin access. Give another account admin access first, so the clinic can't be locked out.`);
     const{password,...rest}=f;
     onSave({...rest,name:f.name.trim(),title:f.title.trim()||ROLE_LABEL[f.role],username,password:password||account.password});
   };
@@ -4158,16 +4186,37 @@ function AccountModal({account,accounts,self,onSave,onClose}){
         <FF label="Job title"><input style={IS} value={f.title} onChange={e=>set("title",e.target.value)} placeholder={ROLE_LABEL[f.role]}/></FF>
         <FF label="Username"><input style={{...IS,fontFamily:C.mono}} value={f.username} onChange={e=>set("username",e.target.value)} autoComplete="off"/></FF>
         <FF label={isNew?"Password":"New password"}><input style={IS} type="password" value={f.password} onChange={e=>set("password",e.target.value)} placeholder={isNew?"At least 8 characters":"Leave blank to keep the current one"} autoComplete="new-password"/></FF>
-        <FF label="Role"><select style={SS} value={f.role} disabled={isSelf} onChange={e=>setF(x=>({...x,role:e.target.value,perms:{}}))}>{DEMO_ORDER.map(r=><option key={r} value={r}>{ROLE_LABEL[r]}</option>)}</select></FF>
+        <FF label="Role"><select style={SS} value={f.role} disabled={isSelf} onChange={e=>setF(x=>({...x,role:e.target.value,perms:permsFor(x).admin&&!roleDefaults(e.target.value).admin?{admin:true}:{}}))}>{DEMO_ORDER.map(r=><option key={r} value={r}>{ROLE_LABEL[r]}</option>)}</select></FF>
         <FF label="Status"><select style={SS} value={f.status} disabled={isSelf} onChange={e=>set("status",e.target.value)}><option value="active">Active, can sign in</option><option value="inactive">Inactive, can't sign in</option></select></FF>
       </div>
+
+      {(()=>{
+        const officeAdmin=f.role==="admin";
+        const lastAdmin=!!account&&hasAdmin(account)&&!accounts.some(a=>a.id!==account.id&&hasAdmin(a));
+        const locked=officeAdmin||(lastAdmin&&!!eff.admin);
+        return(
+          <label style={{display:"flex",alignItems:"flex-start",gap:12,padding:"14px 16px",marginBottom:20,border:`1px solid ${eff.admin?C.border2:C.border}`,borderRadius:8,background:eff.admin?C.raised:"transparent",cursor:locked?"default":"pointer"}}
+            title={officeAdmin?"Office admins always have admin access":locked?"The only account with admin access keeps it":undefined}>
+            <input type="checkbox" checked={!!eff.admin} disabled={locked} onChange={e=>toggle("admin",e.target.checked)} style={{width:16,height:16,marginTop:2,cursor:"inherit",accentColor:"var(--c-navymid)"}}/>
+            <span style={{flex:1,minWidth:0}}>
+              <span style={{display:"flex",alignItems:"center",gap:8,fontSize:14,fontWeight:600,color:C.text}}>Admin access{eff.admin&&<AdminMark/>}</span>
+              <span style={{display:"block",fontSize:12,color:C.muted,marginTop:2,lineHeight:1.5}}>
+                {officeAdmin
+                  ?"Office admins always have it. The admin pages are in their sidebar."
+                  :`Adds "Manage clinic" to their profile menu: staff and accounts, staff schedule, reports, inventory, audit log and backup. Their own ${ROLE_LABEL[f.role].toLowerCase()} sidebar doesn't change.`}
+              </span>
+              {lastAdmin&&!officeAdmin&&<span style={{display:"block",fontSize:12,color:C.text2,marginTop:6}}>This is the only account with admin access, so it can't be switched off. Give another account admin access first.</span>}
+            </span>
+          </label>
+        );
+      })()}
 
       <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:12,borderTop:`1px solid ${C.border}`,paddingTop:16,marginBottom:4}}>
         <div>
           <div style={{fontSize:15,fontWeight:600,color:C.text}}>What this account can use</div>
-          <div style={{fontSize:12,color:C.muted,marginTop:2}}>Starts from the {ROLE_LABEL[f.role].toLowerCase()} defaults. {nCustom?`${nCustom} changed from the default.`:"No changes."}</div>
+          <div style={{fontSize:12,color:C.muted,marginTop:2}}>Pages switched on here show in their sidebar. Starts from the {ROLE_LABEL[f.role].toLowerCase()} defaults. {nCustom?`${nCustom} changed from the default.`:"No changes."}</div>
         </div>
-        {nCustom>0&&<button className="text-link" style={{fontSize:13}} onClick={()=>set("perms",{})}>Reset to role defaults</button>}
+        {nCustom>0&&<button className="text-link" style={{fontSize:13}} onClick={()=>set("perms",isAdminAddOn(f)?{admin:true}:{})}>Reset to role defaults</button>}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:"0 24px"}}>
         {PERM_GROUPS.map(g=>(
@@ -4196,18 +4245,18 @@ function AccountModal({account,accounts,self,onSave,onClose}){
   );
 }
 
-function AdminPage({auditLog,accounts,setAccounts,user,addAudit,showToast}){
+function AdminPage({auditLog,accounts,setAccounts,user,addAudit,showToast,title="Admin panel",tabs=["users","audit log","login history","backup"]}){
   const STAFF_LIST=accounts;
   const[editing,setEditing]=useState(null);   // account being edited, or "new"
-  const[tab,setTab]=useState("users");
+  const[tab,setTab]=useState(tabs[0]);
   const[loginFilter,setLoginFilter]=useState("all");
   const filteredLogins=loginFilter==="all"?INIT_LOGIN_HISTORY:INIT_LOGIN_HISTORY.filter(l=>l.status===loginFilter);
   return(
     <div style={{padding:"24px 32px 48px",maxWidth:1440}}>
-      <PageHeader title="Admin panel" meta={`${STAFF_LIST.length} staff accounts · ${STAFF_LIST.filter(s=>s.status==="active").length} active`}/>
-      <div role="tablist" style={{display:"flex",gap:24,marginBottom:12,borderBottom:`1px solid ${C.border}`}}>
-        {["users","audit log","login history","backup"].map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"10px 0",border:"none",background:"none",cursor:"pointer",fontSize:14,fontWeight:tab===t?500:400,color:tab===t?C.text:C.muted,borderBottom:tab===t?`2px solid ${C.navyMid}`:"2px solid transparent",marginBottom:-1,textTransform:"none",fontFamily:"inherit"}}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
-      </div>
+      <PageHeader title={title} meta={`${STAFF_LIST.length} staff accounts · ${STAFF_LIST.filter(s=>s.status==="active").length} active`}/>
+      {tabs.length>1&&<div role="tablist" style={{display:"flex",gap:24,marginBottom:12,borderBottom:`1px solid ${C.border}`}}>
+        {tabs.map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"10px 0",border:"none",background:"none",cursor:"pointer",fontSize:14,fontWeight:tab===t?500:400,color:tab===t?C.text:C.muted,borderBottom:tab===t?`2px solid ${C.navyMid}`:"2px solid transparent",marginBottom:-1,textTransform:"none",fontFamily:"inherit"}}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
+      </div>}
       {tab==="users"&&<UsersTab accounts={accounts} user={user} onAdd={()=>setEditing("new")} onEdit={a=>setEditing(a)}/>}
       {editing&&<AccountModal account={editing==="new"?null:editing} accounts={accounts} self={user} onClose={()=>setEditing(null)}
         onSave={acc=>{
@@ -4267,8 +4316,8 @@ function SettingsPage({user,settings,setSettings,setPage,blockTimes,setBlockTime
   const lbl=LS;
   return(
     <div style={{padding:"24px 32px 48px",maxWidth:860}}>
-      <PageHeader title="Settings" meta={user.role==="admin"?"Clinic details, hours and preferences":"Your preferences"}/>
-      {user.role==="admin"&&(
+      <PageHeader title="Settings" meta={permsFor(user).admin?"Clinic details, hours and preferences":"Your preferences"}/>
+      {permsFor(user).admin&&(
         <div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:"16px 20px",marginBottom:12,display:"flex",alignItems:"center",gap:12}}>
           <Icon as={ShieldCheck} size={20} style={{color:C.text}}/>
           <div style={{flex:1}}><div style={{fontWeight:600,fontSize:14,color:C.text}}>Admin panel</div><div style={{fontSize:13,color:C.muted,marginTop:2}}>Staff accounts, audit log and backups live in the admin panel.</div></div>
@@ -4343,7 +4392,7 @@ function SettingsPage({user,settings,setSettings,setPage,blockTimes,setBlockTime
           <button className="btn btn-primary">Update password</button>
         </div>
       </Card>
-      {user.role==="admin"&&(
+      {permsFor(user).admin&&(
         <Card style={{marginBottom:12}}>
           <CardHead title="Blocked time" meta="Lunch, meetings and leave that can't be booked"/>
           <div style={{padding:"4px 20px 20px"}}>
@@ -4913,7 +4962,16 @@ export default function App(){
   const[sessionId,setSessionId]=useState(null);
   // The signed-in account is read live, so permission changes apply straight away
   const user=accounts.find(a=>a.id===sessionId&&a.status==="active")||null;
-  const setUser=u=>setSessionId(u?u.id:null);const[page,setPage]=useState("dashboard");
+  const setUser=u=>setSessionId(u?u.id:null);const[page,setPageRaw]=useState("dashboard");
+  // "manage" = the Manage clinic area for accounts with admin access on top of their own role
+  const[area,setArea]=useState("work");
+  const managing=area==="manage"&&isAdminAddOn(user);
+  useEffect(()=>{if(area==="manage"&&user&&!isAdminAddOn(user)){setArea("work");setPageRaw("dashboard");}},[area,user]);
+  const setPage=id=>{
+    if(MANAGE_ONLY.includes(id))setArea("manage");
+    else if(!MANAGE_SHARED.includes(id))setArea("work");
+    setPageRaw(id);
+  };
   const[patients,setPatients]=useState(INIT_PATIENTS);
   const[appts,setAppts]=useState(INIT_APPTS);
   const[recalls,setRecalls]=useState(INIT_RECALLS);
@@ -5018,7 +5076,7 @@ export default function App(){
     return()=>document.removeEventListener("keydown",handler);
   },[]);
 
-  if(!user)return<LoginPage accounts={accounts} onLogin={u=>{setUser(u);setPage("dashboard");setRecentPatients([]);}}/>;
+  if(!user)return<LoginPage accounts={accounts} onLogin={u=>{setUser(u);setArea("work");setPage("dashboard");setRecentPatients([]);}}/>;
   const p=permsFor(user);
   const overdueCount=recalls.filter(r=>r.urgency==="high").length;
   const pendingRefills=refillRequests.filter(r=>r.status==="pending").length;
@@ -5038,12 +5096,16 @@ export default function App(){
     patients:p.patients?<PatientsPage user={user} patients={patients} setPatients={setPatients} vitals={vitals} setVitals={setVitals} rx={rx} setRx={setRx} notes={notes} setNotes={setNotes} draftNotes={draftNotes} setDraftNotes={setDraftNotes} recalls={recalls} setRecalls={setRecalls} appts={appts} setAppts={setAppts} refillRequests={refillRequests} setRefillRequests={setRefillRequests} onOpenPatient={onOpenPatient} openPatientId={openPatientId} setOpenPatientId={setOpenPatientId} setPage={setPage} showToast={showToast} addAudit={addAudit}/>:<Locked/>,
     recalls:p.recalls?<RecallsPage recalls={recalls} setRecalls={setRecalls} patients={patients} appts={appts} setAppts={setAppts} blockTimes={blockTimes}/>:<Locked/>,
     messages:p.messages?<MessagesPage user={user} messages={messages} setMessages={setMessages} contactId={chatContactId} setContactId={setChatContactId} onMinimize={()=>{setPage(lastPageRef.current);setChatOpen(true);}}/>:<Locked msg="Messaging is not available for your role."/>,
-    reports:p.reports?<ReportsPage appts={appts} recalls={recalls} patients={patients}/>:<Locked msg="Reports are restricted to administrators."/>,
+    reports:(p.reports||managing)?<ReportsPage appts={appts} recalls={recalls} patients={patients}/>:<Locked msg="Reports are restricted to administrators."/>,
     refills:p.refills?<RefillQueuePage user={user} patients={patients} rx={rx} setRx={setRx} refillRequests={refillRequests} setRefillRequests={setRefillRequests}/>:<Locked msg="Refill queue access is not available for your role."/>,
     tasks:p.tasks?<TasksPage user={user} tasks={tasks} setTasks={setTasks}/>:<Locked msg="Tasks are not available for your role."/>,
-    inventory:p.inventory?<InventoryPage inventory={inventory} setInventory={setInventory}/>:<Locked msg="Inventory is not available for your role."/>,
-    staffschedule:p.staffSchedule?<StaffSchedulePage staffSchedule={staffSchedule} setStaffSchedule={setStaffSchedule}/>:<Locked msg="Staff schedule is restricted to administrators."/>,
-    admin:p.admin?<AdminPage auditLog={auditLog} accounts={accounts} setAccounts={setAccounts} user={user} addAudit={addAudit} showToast={showToast}/>:<Locked msg="Admin panel is restricted to administrators only."/>,
+    inventory:(p.inventory||managing)?<InventoryPage inventory={inventory} setInventory={setInventory}/>:<Locked msg="Inventory is not available for your role."/>,
+    staffschedule:(p.staffSchedule||managing)?<StaffSchedulePage staffSchedule={staffSchedule} setStaffSchedule={setStaffSchedule}/>:<Locked msg="Staff schedule is restricted to administrators."/>,
+    admin:(p.admin&&user.role==="admin")?<AdminPage auditLog={auditLog} accounts={accounts} setAccounts={setAccounts} user={user} addAudit={addAudit} showToast={showToast}/>:<Locked msg="Admin panel is restricted to administrators only."/>,
+    overview:managing?<Dashboard user={user} view="admin" setPage={setPage} appts={appts} recalls={recalls} refillRequests={refillRequests} inventory={inventory} staffSchedule={staffSchedule} tasks={tasks} patients={patients}/>:<Locked msg="Manage clinic needs admin access."/>,
+    accounts:managing?<AdminPage key="accounts" title="Staff and accounts" tabs={["users","login history"]} auditLog={auditLog} accounts={accounts} setAccounts={setAccounts} user={user} addAudit={addAudit} showToast={showToast}/>:<Locked msg="Manage clinic needs admin access."/>,
+    audit:managing?<AdminPage key="audit" title="Audit log" tabs={["audit log"]} auditLog={auditLog} accounts={accounts} setAccounts={setAccounts} user={user} addAudit={addAudit} showToast={showToast}/>:<Locked msg="Manage clinic needs admin access."/>,
+    backup:managing?<AdminPage key="backup" title="Backup" tabs={["backup"]} auditLog={auditLog} accounts={accounts} setAccounts={setAccounts} user={user} addAudit={addAudit} showToast={showToast}/>:<Locked msg="Manage clinic needs admin access."/>,
     settings:p.settings?<SettingsPage user={user} settings={settings} setSettings={setSettings} setPage={setPage} blockTimes={blockTimes} setBlockTimes={setBlockTimes} themePref={themePref} setThemePref={setThemePref}/>:<Locked msg="Settings are restricted to doctors and admins."/>,
   };
   return(
@@ -5054,9 +5116,11 @@ export default function App(){
       {pendingFollowUp&&<FollowUpModal patient={pendingFollowUp.patient} doctor={pendingFollowUp.doctor} onClose={()=>setPendingFollowUp(null)} onBook={(date)=>{setPendingFollowUp(null);setPage("appointments");}}/>}
       {toast&&<div style={{position:"fixed",bottom:(p.messages&&page!=="messages")?(chatOpen?444:56):24,right:24,zIndex:9999,background:C.navyMid,color:C.onAccent,borderRadius:8,padding:"12px 16px",fontSize:14,fontWeight:500,boxShadow:"var(--shadow-lg)",animation:"rise 220ms var(--ease)",display:"flex",alignItems:"center",gap:10,minWidth:280}}>{toast.color==="green"?<CircleCheck size={18} strokeWidth={2} aria-hidden="true" style={{color:"var(--c-green)"}}/>:<CircleAlert size={18} strokeWidth={2} aria-hidden="true" style={{color:toast.color==="amber"?"var(--c-amber)":"var(--c-red)"}}/>}{toast.msg}</div>}
       {p.messages&&page!=="messages"&&<MessagesDock user={user} messages={messages} setMessages={setMessages} unread={unreadMsgCount} open={chatOpen} setOpen={setChatOpen} contactId={chatContactId} setContactId={setChatContactId} onMaximize={()=>{setChatOpen(false);setPage("messages");}}/>}
-      <Sidebar page={page} setPage={setPage} user={user} recallCount={overdueCount} pendingRefills={pendingRefills} onLogout={()=>{setUser(null);setChatOpen(false);setChatContactId(null);}}/>
+      <Sidebar page={page} setPage={setPage} user={user} recallCount={overdueCount} pendingRefills={pendingRefills}
+        managing={managing} onManage={()=>{setArea("manage");setPageRaw("overview");}} onBackToWork={()=>{setArea("work");setPageRaw("dashboard");}}
+        onLogout={()=>{setArea("work");setUser(null);setChatOpen(false);setChatContactId(null);}}/>
       <main style={{flex:1,minWidth:0,overflow:"hidden",background:C.bg,display:"flex",flexDirection:"column",minHeight:0}}>
-        <TopBar page={page} clinicName={settings.clinicName} onSearchClick={()=>setGlobalSearchOpen(true)} canMessage={p.messages} unreadMsgCount={unreadMsgCount} onMessagesClick={()=>{if(page!=="messages")setChatOpen(o=>!o);}}
+        <TopBar page={page} area={managing?"Manage clinic":null} clinicName={settings.clinicName} onSearchClick={()=>setGlobalSearchOpen(true)} canMessage={p.messages} unreadMsgCount={unreadMsgCount} onMessagesClick={()=>{if(page!=="messages")setChatOpen(o=>!o);}}
           recentPatients={recentPatients} onOpenRecent={pt=>{setOpenPatientId(pt.id);setPage("patients");}}
           doctorReady={!!doctorStatus[user.name]} onToggleReady={user.role==="doctor"?()=>setDoctorStatus(prev=>({...prev,[user.name]:!prev[user.name]})):null}/>
         <div style={{flex:1,overflow:(page==="messages"||page==="flow")?"hidden":"auto"}}>
