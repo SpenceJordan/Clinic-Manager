@@ -7,74 +7,76 @@ html, body {
 
 /* ─────────────────────────────────────────────────────────────────────────
    Med+ design tokens
-   Direction: steady, exact, quietly warm. Neutral graphite surfaces people can
-   look at all day; Med+ blue is the one accent; status colours carry meaning only.
-   Variable names are kept from the old palette so every C.* reference still works.
+   Direction: an operations console a clinic manager reads all day.
+   Cool grey page, white cards with hairline borders, near-black ink as the
+   single action colour. Status colours are reserved for status: a dot, a
+   small pill, or an alert that genuinely needs attention.
+   Variable names are kept from the old palette so every C.* reference works.
    ───────────────────────────────────────────────────────────────────────── */
 
 /* ── Light ── */
 :root {
   color-scheme: light;
   /* surfaces */
-  --c-bg:        #F7F7F8;   /* page */
+  --c-bg:        #EFF0F2;   /* page: a touch darker so white cards separate without heavy lines */
   --c-surface:   #FFFFFF;   /* card */
-  --c-raised:    #F1F1F3;   /* hover row, input fill, active tab */
-  --c-border:    #E4E4E7;   /* hairline */
+  --c-raised:    #F5F6F7;   /* hover row, input fill, active nav */
+  --c-border:    rgba(17,20,24,0.07);   /* hairline: cards, dividers (translucent, so it never reads as an outline) */
+  --c-border2:   rgba(17,20,24,0.13);   /* controls: inputs, secondary buttons */
   /* text: primary / secondary / muted */
-  --c-text:      #18181B;
-  --c-text2:     #52525B;
-  --c-muted:     #71717A;   /* 4.8:1 on card, meta and captions only */
-  /* accent: Med+ blue */
-  --c-navymid:   #2563EB;   /* fill (white text 5.2:1) and links */
-  --c-blue:      #2563EB;
-  --c-accent-hover: #1D4ED8;
-  --c-bluebg:    #EEF3FE;
-  --c-navybg:    #EEF3FE;
-  --c-navy:      #18181B;   /* legacy name, no longer used by the login page */
+  --c-text:      #111418;
+  --c-text2:     #4B515A;
+  --c-muted:     #6B7079;   /* 4.9:1 on card, labels and meta only */
+  /* action colour: ink */
+  --c-navymid:   #121A26;   /* primary fill, links */
+  --c-accent-hover: #273142;
+  --c-navybg:    #EDEFF2;   /* selected, neutral */
+  --c-navy:      #121A26;
   --c-on-accent: #FFFFFF;
   /* status colours, toned to sit inside the neutrals */
-  --c-teal:      #0E7490;  --c-tealbg:   #ECF7F9;
-  --c-green:     #15803D;  --c-greenbg:  #EEF7F1;
-  --c-amber:     #B45309;  --c-amberbg:  #FDF5E9;
-  --c-red:       #DC2626;  --c-redbg:    #FDF0F0;
-  --c-purple:    #6D28D9;  --c-purplebg: #F4F0FD;
+  --c-blue:      #2F5BC4;  --c-bluebg:   #EFF3FB;
+  --c-teal:      #0F7A84;  --c-tealbg:   #EDF6F7;
+  --c-green:     #1E7F45;  --c-greenbg:  #EEF6F0;
+  --c-amber:     #A85A0B;  --c-amberbg:  #FBF4EA;
+  --c-red:       #C9302C;  --c-redbg:    #FCEFEE;
+  --c-purple:    #6447B8;  --c-purplebg: #F3F0FA;
   /* utility */
-  --c-disabled:  #A9BEEA;   /* disabled accent fill */
-  --c-inactive:  #D4D4D8;   /* inactive avatar, off toggle */
-  --c-skeleton:  #EDEDF0;
-  --c-overlay:   rgba(24,24,27,0.40);
-  --shadow-sm:   0 1px 2px rgba(0,0,0,0.05);
-  --shadow-lg:   0 8px 24px rgba(0,0,0,0.08);
+  --c-disabled:  #A9AEB6;   /* disabled action fill */
+  --c-inactive:  #D3D6DB;   /* inactive avatar, off toggle */
+  --c-skeleton:  #ECEEF0;
+  --c-overlay:   rgba(17,20,24,0.36);
+  --shadow-sm:   0 1px 2px rgba(17,20,24,0.04);
+  --shadow-lg:   0 12px 32px rgba(17,20,24,0.10), 0 1px 3px rgba(17,20,24,0.06);
 }
 
 /* ── Dark ── */
 [data-dark] {
   color-scheme: dark;
-  --c-bg:        #141415;
-  --c-surface:   #1B1B1D;
-  --c-raised:    #252528;
-  --c-border:    #2C2C30;
-  --c-text:      #EDEDEF;
-  --c-text2:     #A1A1A8;
-  --c-muted:     #8A8A92;   /* 5.0:1 on card */
-  --c-navymid:   #3B76F0;   /* white text 4.6:1; as text on card 4.4:1 */
-  --c-blue:      #3B76F0;
-  --c-accent-hover: #5287F2;
-  --c-bluebg:    #1A2338;
-  --c-navybg:    #1A2338;
-  --c-navy:      #0F0F10;
-  --c-on-accent: #FFFFFF;
-  --c-teal:      #3BB5CC;  --c-tealbg:   #13272C;
-  --c-green:     #4CC38A;  --c-greenbg:  #142A1F;
-  --c-amber:     #E5A341;  --c-amberbg:  #2D2312;
-  --c-red:       #E5484D;  --c-redbg:    #2E1617;
-  --c-purple:    #A68BEF;  --c-purplebg: #231D35;
-  --c-disabled:  #2D3B5C;
-  --c-inactive:  #3A3A3F;
-  --c-skeleton:  #252528;
+  --c-bg:        #101113;
+  --c-surface:   #17181B;
+  --c-raised:    #1F2024;
+  --c-border:    rgba(255,255,255,0.07);
+  --c-border2:   rgba(255,255,255,0.13);
+  --c-text:      #ECEDEF;
+  --c-text2:     #A6AAB1;
+  --c-muted:     #8C9199;   /* 5.3:1 on card */
+  --c-navymid:   #E8EAED;   /* light ink fill with dark text */
+  --c-accent-hover: #FFFFFF;
+  --c-navybg:    #24262B;
+  --c-navy:      #E8EAED;
+  --c-on-accent: #111214;
+  --c-blue:      #7EA2F0;  --c-bluebg:   #18213A;
+  --c-teal:      #4DB8C2;  --c-tealbg:   #12272A;
+  --c-green:     #5CC48A;  --c-greenbg:  #13281C;
+  --c-amber:     #E2A453;  --c-amberbg:  #2C2212;
+  --c-red:       #EB6A65;  --c-redbg:    #2E1716;
+  --c-purple:    #A994F0;  --c-purplebg: #221D35;
+  --c-disabled:  #4A4E55;
+  --c-inactive:  #3A3D43;
+  --c-skeleton:  #1F2024;
   --c-overlay:   rgba(0,0,0,0.60);
-  --shadow-sm:   0 1px 2px rgba(0,0,0,0.30);
-  --shadow-lg:   0 8px 24px rgba(0,0,0,0.45);
+  --shadow-sm:   none;
+  --shadow-lg:   0 12px 32px rgba(0,0,0,0.50);
 }
 
 html, body {
@@ -89,28 +91,16 @@ html, body {
 .card-shadow-md { box-shadow: var(--shadow-sm); }
 .card-shadow-lg { box-shadow: var(--shadow-lg); }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 .spinner {
   width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+  border: 2px solid color-mix(in srgb, var(--c-on-accent) 30%, transparent);
+  border-top-color: var(--c-on-accent);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   display: inline-block;
@@ -136,7 +126,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--c-navymid) !impo
 /* ── Buttons ── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  height: 36px; padding: 0 16px; border-radius: 8px;
+  height: 36px; padding: 0 16px; border-radius: 6px;
   font: 500 14px/1 var(--font-sans), system-ui, sans-serif;
   cursor: pointer; white-space: nowrap;
   transition: background-color 160ms var(--ease), border-color 160ms var(--ease), color 160ms var(--ease), transform 120ms var(--ease);
@@ -145,18 +135,52 @@ input:focus, select:focus, textarea:focus { border-color: var(--c-navymid) !impo
 .btn:disabled { cursor: default; }
 .btn-primary { background: var(--c-navymid); color: var(--c-on-accent); border: 1px solid transparent; }
 .btn-primary:hover:not(:disabled) { background: var(--c-accent-hover); }
-.btn-primary:disabled { background: var(--c-disabled); }
-.btn-secondary { background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border); }
+.btn-primary:disabled { background: var(--c-disabled); color: var(--c-surface); }
+.btn-secondary { background: var(--c-surface); color: var(--c-text); border: 1px solid var(--c-border2); }
 .btn-secondary:hover { background: var(--c-raised); }
 
 .icon-btn { background: transparent; transition: background-color 160ms var(--ease); }
 .icon-btn:hover { background: var(--c-raised); }
 
 /* ── Clickable cards ── */
-.card-link { transition: border-color 160ms var(--ease); }
-.card-link:hover { border-color: var(--c-text2) !important; }
+.card-link { transition: border-color 160ms var(--ease), background-color 160ms var(--ease); }
+.card-link:hover { border-color: var(--c-border2) !important; background: color-mix(in srgb, var(--c-raised) 50%, var(--c-surface)); }
 
 /* ── Login role buttons ── */
 .role-btn { transition: border-color 160ms var(--ease), background-color 160ms var(--ease); }
-.role-btn:hover:not(:disabled) { border-color: var(--c-text2) !important; }
+.role-btn:hover:not(:disabled) { border-color: var(--c-border2) !important; background: var(--c-raised); }
 .btn-sm { height: 28px; padding: 0 10px; font-size: 12px; gap: 6px; border-radius: 6px; }
+
+/* ── Sidebar nav ── */
+.nav-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  height: 36px; padding: 0 12px; border: none; border-radius: 6px;
+  background: transparent; color: var(--c-text2);
+  font: 400 14px/1 var(--font-sans), system-ui, sans-serif; text-align: left; cursor: pointer;
+  transition: background-color 160ms var(--ease), color 160ms var(--ease);
+}
+.nav-item:hover { background: var(--c-raised); color: var(--c-text); }
+.nav-item[aria-current="page"] { background: var(--c-navybg); color: var(--c-text); font-weight: 500; }
+
+/* ── Text links: ink, underlined, like a paper form ── */
+.text-link {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: 500 13px/1.4 var(--font-sans), system-ui, sans-serif; color: var(--c-text);
+  text-decoration: underline; text-decoration-color: var(--c-border2); text-underline-offset: 3px;
+  transition: text-decoration-color 160ms var(--ease);
+}
+.text-link:hover { text-decoration-color: currentColor; }
+
+/* ── Rows that open something ── */
+.row-link { cursor: pointer; transition: background-color 160ms var(--ease); }
+.row-link:hover { background: var(--c-raised); }
+
+/* ── Quiet loading pulse (skeletons only) ── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ── Tables: one gutter rule. Outer cells line up with card titles (20px). ── */
+.tbl th:first-child, .tbl td:first-child { padding-left: 20px !important; }
+.tbl th:last-child,  .tbl td:last-child  { padding-right: 20px !important; }

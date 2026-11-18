@@ -1,6 +1,6 @@
 # Planned Changes
 
-Last updated: 2026-11-14
+Last updated: 2026-11-16
 
 ---
 
@@ -26,7 +26,7 @@ Admin keeps access to everything but no longer does clinical work. Everything is
 - **Open Tasks** card at the top of the right column: the top 5 open tasks for the whole clinic, highest priority first, then soonest due. Each row shows a priority dot, who it's assigned to, and the due date (red when overdue, amber when due today). Clicking a task or "All tasks →" opens Tasks. View-only.
 
 **Still to test in the browser**
-- [ ] Admin top row and "More" dropdown look right
+- [ ] Admin sidebar groups (Dashboard, Reports / Operations / Clinical) look right (the top row and "More" menu were replaced by the sidebar in step 6)
 - [ ] Admin patient chart: can see prescriptions, notes and vitals, but has no write, sign, record, order, approve or add-allergy buttons
 - [ ] Admin Refill Queue: can view but has no approve button
 - [ ] Dashboard counts and links work
@@ -54,11 +54,11 @@ Admin keeps access to everything but no longer does clinical work. Everything is
 
 ## Next: UI cleanup ("unslop") + dark mode
 
-**Status:** In progress. The direction is confirmed (blue accent; the theme toggle stays in Settings and follows the device).
+**Status:** Steps 1–7 done. The direction changed in step 6 to ink as the only action colour (see step 6); the theme toggle stays in Settings and follows the device.
 
 **Direction (proposed)**
 - **Character:** steady, exact, quietly warm. The world is the exam room and the paper chart.
-- **Colors:** neutral grey backgrounds. Med+ blue `#2563EB` is the only accent, as a solid color with no gradients. Status colors (teal, amber, green, red) are used only for statuses.
+- **Colors:** neutral grey backgrounds. Ink `#121A26` is the only action colour (was Med+ blue until step 6), solid, no gradients. Status colors (teal, amber, green, red) are used only for statuses.
 - **Moments:** the Patient Flow board and vitals in the patient chart. These are the only places with rich color.
 - **Signature:** a status-colored tab on the left edge of patient rows and cards.
 - **Type:** IBM Plex Sans with IBM Plex Mono for times, record numbers and vitals. Weights 400 and 500, and no all-caps labels.
@@ -115,13 +115,25 @@ Each step builds on the one before it, so the order matters.
 - [x] **Bug fixed:** 12 places built colors as `${color}30` or `color+"15"` (hex plus alpha). Since the colors became CSS variables, that produced invalid CSS, so borders and tints silently disappeared (flow board, appointment calendars, …). A new `tint(color, %)` helper uses `color-mix()` and works with variables.
 - [x] Cleared the last heavy 700/800 font weights (in conditional styles)
 
-**6. Remaining pages**, one at a time: Appointments, Patients list, Refills, Recalls, Tasks, Inventory, Staff Schedule, Reports, Admin, Settings
-- [ ] Replace the rest of the emoji (✓ ⚠ 📅 🔒 📋 …) with icons or plain text
-- [ ] All-caps table headers → normal case
+**6. Remaining pages + reference redesign** ✅ done 2026-11-16 (not committed yet)
+Direction changed after a reference dashboard: an operations console. Ink (`#121A26`) replaces Med+ blue as the only action colour; colour is for status only.
+- [x] **Tokens:** cooler grey page (`#EFF0F2`), translucent hairline borders (`rgba(17,20,24,0.07)`, controls `0.13`) so outlines never read heavy, 8px card corners, 6px buttons. Dark mode flips ink to near-white with dark text.
+- [x] **Shell:** left sidebar (232px) grouped by role. Admin: Dashboard, Reports / Operations / Clinical. Others: Today / Patients / Work. Badges are neutral except overdue recalls. Profile sits at the bottom of the sidebar. The thin header has the breadcrumb (clinic / page), the doctor's Ready/Busy toggle, recent patients, search and messages. The old top nav and "More" menu are gone.
+- [x] **Shared parts:** `PageHeader` (title, status pill, meta line, actions), `CardHead`, `StatCard` tiles (icon, label, dot and value, context), `KVGrid` (label/value grid with hairline dividers), `Alert` (only for things that need someone now), `Timeline`, `Segmented` (one style for every view switch and filter), `ApptTable`. Badges are now dot + dark text on a faint tint; visit types and roles are neutral.
+- [x] **Admin dashboard:** "Clinic overview" with a status pill, low-stock banner, "Today at a glance" grid, 5 status tiles, "Clinic day" timeline next to today's appointments, and a data-driven alert for visits booked after a doctor's shift ends (Yuki Tanaka 14:00 vs Dr. Williams until 13:00). Bottom row: open tasks, staff activity with shift times, supplies to watch.
+- [x] Doctor, nurse and receptionist dashboards rebuilt on the same parts.
+- [x] Every page uses `PageHeader`: Appointments, Patient flow, Patients, Patient chart, Refills, Recalls, Tasks, Inventory, Staff schedule, Reports, Admin, Settings.
+- [x] Patient chart: name + risk/DNC pills, allergy banner, "Patient information" grid, cleaner tabs; the duplicate breadcrumb was removed.
+- [x] All emoji replaced with lucide icons or plain text (0 left). Title Case labels, buttons and form labels are now sentence case.
+- [x] **Bugs fixed:** calendar blocks used `${col}60` (invalid CSS on variables); white text on ink fills disappeared in dark mode (buttons, chat bubbles, calendar); coloured row tints and hard-coded hex colours removed.
+- [x] **Customisable dashboard (admin):** "Customise" in the dashboard header turns on edit mode. Panels (Today at a glance, Clinic day, Open tasks, Appointments today, Staff activity, Supplies to watch) can be dragged between a full-width row, the narrow column and the wide column, or moved with toolbar buttons (up, down, other column, full width, hide). Hidden panels come back from the tray; "Reset to default" restores the layout. Saved per role in localStorage (`medplus.dashboard.<role>`). Built as a reusable `DashboardLayout`, so the other roles' dashboards can use it next.
+- [ ] Check in the browser: nurse and receptionist views, modals (new patient scan, Rx, visit note), Messages page
 
-**7. Final sweep**
-- [ ] Motion: one easing curve. Remove the looping pulse on the scanning emoji and keep the loading skeleton subtle.
-- [ ] Run the unslop checklist and check every role in light and dark mode
+**7. Final sweep** ✅ done 2026-11-18 (not committed yet)
+- [x] Motion: every animation and transition uses `--ease` (page and patient fades, modals, toasts and alerts now use `rise 220ms var(--ease)`; Messages hovers, the scan progress bar, report bars and the end-of-day checklist got timings and the curve). The unused `fadeIn` and `slideIn` keyframes are removed. The only `cubic-bezier` left is the `--ease` definition. The skeleton pulse is softer (1.6s ease-in-out, down to 70% opacity).
+- [x] Unslop checklist: 0 emoji, 0 uppercase labels, 0 weights above 600, 0 `transition: all`, no glows. What's left is on purpose: the conic gradient is the no-show donut, tight tracking only on big figures and H1, hex colours only in the print views.
+- [x] Every page for all 4 roles screenshotted in light and dark (76 screens): consistent, no console errors.
+- [x] Added `app/icon.svg` (ink plus mark) so the browser tab has an icon (`/favicon.ico` was a 404)
 
 ### Dark mode decisions
 - The toggle stays in **Settings only** for now (Settings is limited to doctor and admin, so nurses and receptionists get the device setting)
@@ -130,6 +142,75 @@ Each step builds on the one before it, so the order matters.
 
 ---
 
+## Suggested next (from the 2026-11-16 sessions)
+
+**Check in the browser** (couldn't be confirmed by screenshot)
+- [ ] Nurse and receptionist dashboards
+- [ ] Modals: new appointment, new patient (document scan), prescription, visit note, recall, follow-up, end-of-day checklist
+- [ ] Messages page and popup in the new design
+- [ ] Patient chart tab row lines up with the page title (same fix as the Admin panel tabs)
+- [ ] Cards that lost the line under their title (Admin "Staff users" and similar) look right
+- [ ] Dashboard customise mode: dragging panels with the mouse (the move buttons, hiding, reset and saving after a reload were tested; mouse dragging wasn't)
+- [ ] Light and dark mode for every role (part of step 7)
+
+**Features**
+- [ ] Customisable dashboards for doctor, nurse and receptionist using the same `DashboardLayout` (only the office admin has it now)
+- [ ] Save dashboard layouts to the user's account instead of the browser, so they follow the user to other computers (needs a backend; today it's `localStorage`, key `medplus.dashboard.<role>`)
+
+**Housekeeping**
+- [ ] Commit the step 6 work, the dashboard customisation and the spacing fixes (nothing is committed since `db0bb21`)
+- [ ] Decide what to do with `step6-emoji-inventory.md` (untracked; all emoji in it are now replaced): delete it or keep it for reference
+- Note: don't run `next build` in the project folder while `npm run dev` is running. It overwrites `.next` and breaks the dev server (fix: stop it, `rm -rf .next`, `npm run dev`).
+
+---
+
+## Security (before any real patient data goes in)
+
+Med+ is a front-end demo today: there's no server, and everything lives in memory in the browser. That's fine for a demo, but none of it is safe for real patients yet. Run **`/security-review`** before anything goes live (suggested 2026-11-14).
+
+What's in the code now (checked 2026-11-16):
+- [ ] **Logins are fake.** `DEMO_USERS` in `components/App.jsx` holds plain-text passwords, they're shown on the login page, and the check runs in the browser. Real use needs a server with hashed passwords (bcrypt/argon2), sessions or tokens, and password reset.
+- [ ] **Permissions are only enforced in the UI.** `PERMS` hides buttons and pages, but anyone can change browser code. Every permission check has to be repeated on the server.
+- [ ] **Print views insert patient data as raw HTML.** Daily schedule, prescription and patient summary use `w.document.write(...)` with names, notes and allergies dropped straight into the HTML (3 places). A name like `<img onerror=…>` would run code. Escape the values or build the print view with React.
+- [ ] **No data storage or encryption.** Patients, notes and prescriptions reset on refresh. A real backend needs an encrypted database, HTTPS, and backups (the Admin "Run backup" button doesn't do anything yet).
+- [ ] **Audit log isn't trustworthy.** It's kept in browser memory and anyone could edit it. It needs to be written on the server and be append-only.
+- [ ] **No automatic sign-out.** Add an idle timeout or lock screen for shared front-desk computers.
+- [ ] **Privacy rules.** If it's used in the US, it needs HIPAA safeguards: access logs, minimum necessary access, a BAA with the hosting provider. Elsewhere, check local health-data law.
+- [ ] Keep secrets out of git: `.env` files are already in `.gitignore`. Keep it that way once there are API keys.
+
+---
+
+## Tools to use while working on this (suggested 2026-11-14)
+- [ ] **`/init`**: creates a `CLAUDE.md` describing the project (the Next.js app is the root; `clinic-demo/` is the old Vite version; how to run it), so new sessions start with context. Not done yet.
+- **`/run`**: starts the app and checks it works.
+- **`/code-review`**: checks changes for bugs before committing or pushing (e.g. `/code-review medium`).
+- **`/simplify`**: cleans up changed code. `components/App.jsx` is ~4,900 lines now, so splitting it into files would help (see Future ideas).
+- **`/security-review`**: see Security above.
+- **`/fewer-permission-prompts`**: pre-allows the safe commands you keep approving.
+- **`skill-creator`**: build your own skill, e.g. a `/ui-check` that starts the dev server and reviews UI changes in one step.
+
+Suggested routine: `/init` once, `/run` while working, `/code-review` before each push.
+
+---
+
+## Git
+- Work is on the local branch **`ui-redesign`** (commit `db0bb21` plus uncommitted changes since). **Not pushed and not merged into `main`.**
+- Back it up: `git push -u origin ui-redesign`
+- Put it on main when you're happy: `git checkout main && git merge ui-redesign`
+
+---
+
+## Future ideas
+- [ ] **Real backend** (database + API) so data survives a refresh and is shared between staff. Everything in the Security section depends on this.
+- [ ] **Split `components/App.jsx`** into files per page and shared components (`components/ui/`, `pages/…`). It's ~4,900 lines in one file, which makes every change slower and riskier.
+- [ ] **Make the dashboard's "Reassign visit" and "Extend shift" do the job directly.** Right now they just open Appointments or Staff schedule.
+- [ ] **Real "today"**: the app is pinned to Feb 25, 2026 at 10:10 (`DEMO_TODAY`, `DEMO_NOW`). Switch to the real date and time when it's used for real.
+- [ ] **Notifications** for urgent things (a patient waiting too long, critical vitals, low stock), which the Settings toggles already hint at.
+- [ ] **Mobile and tablet layout**: the sidebar and wide tables assume a desktop screen.
+- [ ] **Tests** for the important logic: permissions, shift conflicts, vitals ranges, refill approvals.
+
+---
+
 ## Saved for later
 
-- **Reorder the top row for nurse and receptionist** so it fits each role, like the admin change.
+- **Review the sidebar groups for nurse and receptionist** (currently Today / Patients / Work) so each fits the role, like the admin grouping.
