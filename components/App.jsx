@@ -2,12 +2,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import { Plus, Search, Mail, ChevronDown, ChevronUp, ChevronLeft, Settings, LogOut, LayoutDashboard, CalendarDays, Columns3, Users, Pill, BellRing, ChartColumn, ListChecks, Package, CalendarClock, ShieldCheck, Briefcase, Stethoscope, HeartPulse, CalendarCheck, MessageSquare, Maximize2, Minimize2, ArrowUp, TriangleAlert, ArrowRight, Check, Timer, BellRing as Bell, ClipboardList, CalendarX2, X, Lock, ChevronRight, CircleAlert, CircleCheck, Ellipsis, UserRound, Activity, ClipboardCheck, Clock, Printer, FileText, FolderOpen, Phone, Ban, ScanLine, Moon, NotebookPen, ArrowLeft, List, CalendarRange, Hourglass, CalendarPlus, Info, GripVertical, Eye, EyeOff, ArrowDown, ArrowLeftRight, SlidersHorizontal, RotateCcw } from "lucide-react";
 
-const DEMO_USERS = [
-  { username:"admin",        password:"Admin1234!",  name:"Sandra Kim",       role:"admin",        title:"Office Administrator" },
-  { username:"doctor",       password:"Doctor1234!", name:"Dr. Priya Patel",  role:"doctor",       title:"Physician, MD" },
-  { username:"nurse",        password:"Nurse1234!",  name:"James Torres",     role:"nurse",        title:"Registered Nurse" },
-  { username:"receptionist", password:"Recept1234!", name:"Brianna Wells",    role:"receptionist", title:"Front Desk" },
-];
 const ROLE_LABEL = { admin:"Office admin", doctor:"Doctor", nurse:"Nurse", receptionist:"Receptionist" };
 const INIT_PATIENTS = [
   { id:1, first_name:"Margaret", last_name:"Chen",    dob:"1968-04-12", gender:"F", phone:"555-0142", insurance:"BlueCross",   allergies:["Penicillin","Sulfa"], lastVisit:"2026-02-10", active:true,  contactPref:"Call",  bestTime:"Morning",   dnc:false },
@@ -279,14 +273,21 @@ const INIT_AUDIT_LOG = [
   { id:9, user:"James Torres",     role:"nurse",        action:"Edited",  subject:"Yuki Tanaka",    section:"Vitals",         ts:"2026-02-24 09:03:55" },
   { id:10,user:"Sandra Kim",       role:"admin",        action:"Viewed",  subject:"Robert Vásquez", section:"Overview",       ts:"2026-02-23 16:30:00" },
 ];
-const STAFF_LIST = [
-  { id:1, name:"Dr. Priya Patel",   role:"doctor",       status:"active",   lastLogin:"2026-02-25 08:14", username:"doctor" },
-  { id:2, name:"Dr. Owen Williams", role:"doctor",       status:"active",   lastLogin:"2026-02-25 07:58", username:"williams" },
-  { id:3, name:"James Torres",      role:"nurse",        status:"active",   lastLogin:"2026-02-25 08:02", username:"nurse" },
-  { id:4, name:"Brianna Wells",     role:"receptionist", status:"active",   lastLogin:"2026-02-25 07:45", username:"receptionist" },
-  { id:5, name:"Sandra Kim",        role:"admin",        status:"active",   lastLogin:"2026-02-25 08:30", username:"admin" },
-  { id:6, name:"Marcus Reed",       role:"nurse",        status:"inactive", lastLogin:"2026-02-10 09:30", username:"mreed" },
+// Staff accounts. The office admin can add accounts and change what each one can do (Admin panel → Users).
+// Demo only: kept in this browser's localStorage with plain-text passwords. A real deployment needs a server (see PLANNED_CHANGES.md → Security).
+const INIT_ACCOUNTS = [
+  { id:1, name:"Dr. Priya Patel",   role:"doctor",       status:"active",   lastLogin:"2026-02-25 08:14", username:"doctor",       password:"Doctor1234!",   title:"Physician, MD",        demo:true },
+  { id:2, name:"Dr. Owen Williams", role:"doctor",       status:"active",   lastLogin:"2026-02-25 07:58", username:"williams",     password:"Williams1234!", title:"Physician, MD" },
+  { id:3, name:"James Torres",      role:"nurse",        status:"active",   lastLogin:"2026-02-25 08:02", username:"nurse",        password:"Nurse1234!",    title:"Registered Nurse",     demo:true },
+  { id:4, name:"Brianna Wells",     role:"receptionist", status:"active",   lastLogin:"2026-02-25 07:45", username:"receptionist", password:"Recept1234!",   title:"Front Desk",           demo:true },
+  { id:5, name:"Sandra Kim",        role:"admin",        status:"active",   lastLogin:"2026-02-25 08:30", username:"admin",        password:"Admin1234!",    title:"Office Administrator", demo:true },
+  { id:6, name:"Marcus Reed",       role:"nurse",        status:"inactive", lastLogin:"2026-02-10 09:30", username:"mreed",        password:"Reed1234!",     title:"Registered Nurse" },
 ];
+const DEMO_ORDER=["admin","doctor","nurse","receptionist"];
+const ACCOUNTS_KEY="medplus.accounts";
+// Every component reads the live account list from here, so new accounts show up in messages, schedules and dashboards
+const StaffContext=React.createContext(INIT_ACCOUNTS);
+const useStaff=()=>React.useContext(StaffContext);
 
 // Seed some initial messages between staff members
 // Key format: "senderUsername:recipientUsername" sorted alphabetically
@@ -309,11 +310,39 @@ const INIT_MESSAGES = {
 };
 
 const PERMS = {
-  admin:        { appointments:true,  patients:true,  vitals:false, viewVitals:true,  notes:false, prescriptions:false, viewRx:true,  writeRx:false, viewNotes:true,  writeNotes:false, recalls:true, admin:true,  settings:true,  messages:true, flow:true, reports:true,  refills:true,  refillApprove:false, tasks:true, inventory:true,  staffSchedule:true  },
-  doctor:       { appointments:true,  patients:true,  vitals:true,  viewVitals:true,  notes:true,  prescriptions:true,  viewRx:true,  writeRx:true,  viewNotes:true,  writeNotes:true,  recalls:true, admin:false, settings:true,  messages:true, flow:true, reports:false, refills:true,  refillApprove:true,  tasks:true, inventory:false, staffSchedule:false },
-  nurse:        { appointments:true,  patients:true,  vitals:true,  viewVitals:true,  notes:false, prescriptions:false, viewRx:true,  writeRx:false, viewNotes:true,  writeNotes:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false, refills:true,  refillApprove:false, tasks:true, inventory:true,  staffSchedule:false },
-  receptionist: { appointments:true,  patients:true,  vitals:false, viewVitals:false, notes:false, prescriptions:false, viewRx:false, writeRx:false, viewNotes:false, writeNotes:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false, refills:true,  refillApprove:false, tasks:true, inventory:false, staffSchedule:false },
+  admin:        { appointments:true,  patients:true,  vitals:false, viewVitals:true,  notes:false, prescriptions:false, viewRx:true,  writeRx:false, viewNotes:true,  writeNotes:false, recalls:true, admin:true,  settings:true,  messages:true, flow:true, reports:true,  refills:true,  refillApprove:false, tasks:true, inventory:true,  staffSchedule:true  , registerPatients:true,  createTasks:true, customiseDashboard:true },
+  doctor:       { appointments:true,  patients:true,  vitals:true,  viewVitals:true,  notes:true,  prescriptions:true,  viewRx:true,  writeRx:true,  viewNotes:true,  writeNotes:true,  recalls:true, admin:false, settings:true,  messages:true, flow:true, reports:false, refills:true,  refillApprove:true,  tasks:true, inventory:false, staffSchedule:false , registerPatients:false, createTasks:true, customiseDashboard:true },
+  nurse:        { appointments:true,  patients:true,  vitals:true,  viewVitals:true,  notes:false, prescriptions:false, viewRx:true,  writeRx:false, viewNotes:true,  writeNotes:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false, refills:true,  refillApprove:false, tasks:true, inventory:true,  staffSchedule:false , registerPatients:false, createTasks:false, customiseDashboard:true },
+  receptionist: { appointments:true,  patients:true,  vitals:false, viewVitals:false, notes:false, prescriptions:false, viewRx:false, writeRx:false, viewNotes:false, writeNotes:false, recalls:true, admin:false, settings:false, messages:true, flow:true, reports:false, refills:true,  refillApprove:false, tasks:true, inventory:false, staffSchedule:false , registerPatients:true,  createTasks:false, customiseDashboard:true },
 };
+// What the admin can switch on or off per account. Dashboard is always available.
+const PERM_GROUPS=[
+  {label:"Pages",items:[
+    ["appointments","Appointments"],["flow","Patient flow"],["patients","Patients"],["refills","Refill queue"],["recalls","Recalls"],
+    ["tasks","Tasks"],["inventory","Inventory"],["reports","Reports"],["staffSchedule","Staff schedule"],["messages","Messages"],
+    ["settings","Settings"],["admin","Admin panel","Accounts, permissions, audit log"],
+  ]},
+  {label:"Clinical",items:[
+    ["viewVitals","See vitals"],["vitals","Record vitals and allergies"],
+    ["viewNotes","Read visit notes"],["writeNotes","Write and sign visit notes"],
+    ["viewRx","See prescriptions"],["writeRx","Prescribe, edit problems, order labs"],
+    ["refillApprove","Approve refill requests"],
+  ]},
+  {label:"Front desk and work",items:[
+    ["registerPatients","Register new patients"],["createTasks","Create and assign tasks"],
+    ["customiseDashboard","Customise their dashboard"],
+  ]},
+];
+// A write permission needs its read permission; switching one changes the other
+const PERM_NEEDS={vitals:"viewVitals",writeNotes:"viewNotes",writeRx:"viewRx",refillApprove:"refills"};
+const roleDefaults=role=>PERMS[role]||PERMS.receptionist;
+// Effective permissions: role defaults, then the account's own changes
+function permsFor(user){
+  const p={...roleDefaults(user?.role),...(user?.perms||{})};
+  Object.entries(PERM_NEEDS).forEach(([w,r])=>{if(p[w])p[r]=true;});
+  p.prescriptions=p.writeRx; p.notes=p.writeNotes;   // older keys still read in the chart
+  return p;
+}
 const C = {
   bg:"var(--c-bg)", surface:"var(--c-surface)", border:"var(--c-border)",
   navy:"var(--c-navy)", navyMid:"var(--c-navymid)", teal:"var(--c-teal)",
@@ -635,6 +664,7 @@ function StaffAvatar({ name, role, size=32, fontSize=12 }) {
 
 // ─── MESSAGES PAGE ──────────────────────────────────────────────────────────
 function MessagesPage({ user, messages, setMessages, compact = false, contactId, setContactId, onMinimize }) {
+  const STAFF_LIST = useStaff().filter(s => s.status === "active" || s.username === user.username);
   // Build contact list: all staff except the current user
   const contacts = STAFF_LIST.filter(s => s.username !== user.username);
   // Active conversation can be controlled by the parent (shared between popup and full page)
@@ -1438,7 +1468,7 @@ const NAV_GROUPS={
 const initials=name=>name.split(" ").filter(w=>!w.startsWith("Dr")).map(w=>w[0]).join("").slice(0,2);
 
 function Sidebar({page,setPage,user,recallCount,pendingRefills,onLogout}){
-  const p=PERMS[user.role];
+  const p=permsFor(user);
   const show={dashboard:true,appointments:p.appointments,flow:p.flow,patients:p.patients,refills:p.refills,recalls:p.recalls,reports:p.reports,tasks:p.tasks,inventory:p.inventory,staffschedule:p.staffSchedule,admin:p.admin};
   const badge={refills:p.refillApprove?pendingRefills:0,recalls:recallCount};
   const groups=(NAV_GROUPS[user.role]||NAV_GROUPS.default).map(g=>({...g,ids:g.ids.filter(id=>show[id])})).filter(g=>g.ids.length);
@@ -1677,7 +1707,7 @@ const Grid=({cols,children,style})=><div style={{display:"grid",gridTemplateColu
 const DASH_ZONES=["top","left","right","hidden"];
 const ADMIN_DASH_DEFAULT={top:["glance"],left:["clinicDay","tasks","staff"],right:["appointments","supplies"],hidden:[]};
 
-function DashboardLayout({storageKey,panels,defaults,header}){
+function DashboardLayout({storageKey,legacyKey,canCustomise=true,panels,defaults,header}){
   const ids=Object.keys(panels);
   // Keep only known panels, once each; anything new goes to its default zone
   const normalize=l=>{
@@ -1686,7 +1716,7 @@ function DashboardLayout({storageKey,panels,defaults,header}){
     ids.forEach(id=>{if(!seen.has(id)){const z=DASH_ZONES.find(z=>defaults[z]?.includes(id))||"right";out[z].push(id);}});
     return out;
   };
-  const[layout,setLayout]=useState(()=>{try{const saved=localStorage.getItem(storageKey);if(saved)return normalize(JSON.parse(saved));}catch{}return normalize(defaults);});
+  const[layout,setLayout]=useState(()=>{try{const saved=localStorage.getItem(storageKey)??(legacyKey&&localStorage.getItem(legacyKey));if(saved)return normalize(JSON.parse(saved));}catch{}return normalize(defaults);});
   useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify(layout));}catch{}},[layout,storageKey]);
   const[editing,setEditing]=useState(false);
   const[drag,setDrag]=useState(null);   // id of the panel being dragged
@@ -1751,7 +1781,7 @@ function DashboardLayout({storageKey,panels,defaults,header}){
     );
   };
 
-  const customize=(
+  const customize=canCustomise&&(
     <XB onClick={()=>{setEditing(v=>!v);endDrag();}}>
       {editing?<><Icon as={Check}/>Done</>:<><Icon as={SlidersHorizontal}/>Customise</>}
     </XB>
@@ -1764,7 +1794,7 @@ function DashboardLayout({storageKey,panels,defaults,header}){
           <Icon as={SlidersHorizontal} style={{color:C.text2}}/>
           <div style={{flex:1,minWidth:240}}>
             <div style={{fontSize:14,fontWeight:600,color:C.text}}>Customising your dashboard</div>
-            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Drag a panel to move it, or use its buttons. Changes save automatically to this browser.</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>Drag a panel to move it, or use its buttons. Your layout is saved for your account on this browser.</div>
           </div>
           {layout.hidden.length>0&&(
             <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
@@ -1789,6 +1819,7 @@ function DashboardLayout({storageKey,panels,defaults,header}){
 }
 
 function Dashboard({user,setPage,appts,recalls,refillRequests,inventory=[],staffSchedule=[],tasks=[],patients=[]}){
+  const STAFF_LIST=useStaff();
   const r=user.role;
   const TODAY=DEMO_TODAY, NOW=DEMO_NOW;
   const todayAppts=appts.filter(a=>(a.date||TODAY)===TODAY).sort((a,b)=>a.time.localeCompare(b.time));
@@ -1804,65 +1835,73 @@ function Dashboard({user,setPage,appts,recalls,refillRequests,inventory=[],staff
   const nextUp=todayAppts.find(a=>a.status==="scheduled"&&toMin(a.time)>=toMin(NOW));
   const longestWait=Math.max(0,...inClinic.filter(a=>a.stageEnteredAt).map(a=>toMin(NOW)-toMin(a.stageEnteredAt.slice(11))));
   const dayHeader=(sub,actions)=><DashHeader date={TODAY} sub={sub} actions={actions}/>;
+  const dashKey=`medplus.dashboard.user.${user.username}`, canCustomise=permsFor(user).customiseDashboard!==false;
 
-  if(r==="receptionist")return(
-    <PageWrap>
-      {dayHeader(`Front desk · ${todayAppts.length} appointments booked`,<><XB onClick={()=>setPage("recalls")}>Recalls</XB><PB onClick={()=>setPage("appointments")}>Book appointment</PB></>)}
-      <Grid cols="repeat(4,minmax(0,1fr))">
-        <StatCard icon={CalendarDays} label="Booked today" value={todayAppts.length} sub={nextUp?`Next: ${nextUp.time} ${nextUp.patient}`:"No one left to arrive"} onClick={()=>setPage("appointments")}/>
-        <StatCard icon={ClipboardList} label="Waiting room" value={checkedIn.length} dot={checkedIn.length?C.teal:undefined} sub="Checked in" onClick={()=>setPage("flow")}/>
-        <StatCard icon={CalendarX2} label="No-shows" value={noShows.length} tone="red" sub="Need follow-up"/>
-        <StatCard icon={BellRing} label="Overdue recalls" value={overdue.length} tone="red" sub="Need scheduling" onClick={()=>setPage("recalls")}/>
-      </Grid>
-      <FlowWidget appts={appts} setPage={setPage}/>
-      <Grid cols="minmax(0,2fr) minmax(0,1fr)">
-        <Card><CardHead title="Appointments today" meta={`${completed.length} of ${todayAppts.length} done`} action="Calendar" onAction={()=>setPage("appointments")}/><ApptTable rows={todayAppts}/></Card>
-        <UpcomingWidget appts={appts}/>
-      </Grid>
-    </PageWrap>
+  // Every role's dashboard is a set of panels; DashboardLayout lets each account arrange its own
+  const roleDash=(defaults,panels,sub,actions,alert)=>(
+    <DashboardLayout storageKey={dashKey} legacyKey={`medplus.dashboard.${r}`} canCustomise={canCustomise} panels={panels} defaults={defaults}
+      header={customize=>(<>{dayHeader(sub,<>{customize}{actions}</>)}{alert}</>)}/>
+  );
+
+  if(r==="receptionist")return roleDash(
+    {top:["stats","flow"],left:["upcoming"],right:["appointments"],hidden:[]},
+    {
+      stats:{title:"Today in numbers",el:(
+        <Grid cols="repeat(4,minmax(0,1fr))" style={{marginBottom:0}}>
+          <StatCard icon={CalendarDays} label="Booked today" value={todayAppts.length} sub={nextUp?`Next: ${nextUp.time} ${nextUp.patient}`:"No one left to arrive"} onClick={()=>setPage("appointments")}/>
+          <StatCard icon={ClipboardList} label="Waiting room" value={checkedIn.length} dot={checkedIn.length?C.teal:undefined} sub="Checked in" onClick={()=>setPage("flow")}/>
+          <StatCard icon={CalendarX2} label="No-shows" value={noShows.length} tone="red" sub="Need follow-up"/>
+          <StatCard icon={BellRing} label="Overdue recalls" value={overdue.length} tone="red" sub="Need scheduling" onClick={()=>setPage("recalls")}/>
+        </Grid>)},
+      flow:{title:"Patient flow",el:<FlowWidget appts={appts} setPage={setPage} flush/>},
+      appointments:{title:"Appointments today",el:<Card><CardHead title="Appointments today" meta={`${completed.length} of ${todayAppts.length} done`} action="Calendar" onAction={()=>setPage("appointments")}/><ApptTable rows={todayAppts}/></Card>},
+      upcoming:{title:"Tomorrow",el:<UpcomingWidget appts={appts}/>},
+    },
+    `Front desk · ${todayAppts.length} appointments booked`,
+    <><XB onClick={()=>setPage("recalls")}>Recalls</XB><PB onClick={()=>setPage("appointments")}>Book appointment</PB></>
   );
 
   if(r==="nurse"){
     const ready=todayAppts.filter(a=>["checked-in","scheduled"].includes(a.status)).slice(0,5);
-    return(
-    <PageWrap>
-      {dayHeader(`Nursing · ${checkedIn.length} waiting for vitals`,<PB onClick={()=>setPage("flow")}>Open patient flow</PB>)}
-      {checkedIn.length>0&&<Alert tone="amber" title={`${checkedIn.length} patient${checkedIn.length>1?"s":""} waiting for vitals`} meta={checkedIn.map(a=>a.patient).join(", ")} onClick={()=>setPage("flow")} style={{marginBottom:12}}/>}
-      <Grid cols="repeat(4,minmax(0,1fr))">
-        <StatCard icon={ClipboardList} label="Checked in" value={checkedIn.length} dot={checkedIn.length?C.teal:undefined} sub="Awaiting vitals"/>
-        <StatCard icon={Stethoscope} label="With doctor" value={inProg.length} sub="In progress"/>
-        <StatCard icon={CalendarDays} label="Still to arrive" value={todayAppts.filter(a=>a.status==="scheduled").length} sub="Scheduled"/>
-        <StatCard icon={CalendarX2} label="No-shows" value={noShows.length} tone="red" sub="Today"/>
-      </Grid>
-      <FlowWidget appts={appts} setPage={setPage}/>
-      <Grid cols="minmax(0,1fr) minmax(0,1fr)">
-        <Card><CardHead title="Ready for vitals" meta="Checked in first, then by time"/><ApptTable rows={[...ready].sort((a,b)=>(a.status==="checked-in"?0:1)-(b.status==="checked-in"?0:1))} empty="No one waiting"/></Card>
-        <Card><CardHead title="Recalls" meta={`${overdue.length} overdue`} action="All recalls" onAction={()=>setPage("recalls")}/><RecallList recalls={recalls}/></Card>
-      </Grid>
-    </PageWrap>
+    return roleDash(
+    {top:["stats","flow"],left:["recalls"],right:["ready"],hidden:[]},
+    {
+      stats:{title:"Today in numbers",el:(
+        <Grid cols="repeat(4,minmax(0,1fr))" style={{marginBottom:0}}>
+          <StatCard icon={ClipboardList} label="Checked in" value={checkedIn.length} dot={checkedIn.length?C.teal:undefined} sub="Awaiting vitals"/>
+          <StatCard icon={Stethoscope} label="With doctor" value={inProg.length} sub="In progress"/>
+          <StatCard icon={CalendarDays} label="Still to arrive" value={todayAppts.filter(a=>a.status==="scheduled").length} sub="Scheduled"/>
+          <StatCard icon={CalendarX2} label="No-shows" value={noShows.length} tone="red" sub="Today"/>
+        </Grid>)},
+      flow:{title:"Patient flow",el:<FlowWidget appts={appts} setPage={setPage} flush/>},
+      ready:{title:"Ready for vitals",el:<Card><CardHead title="Ready for vitals" meta="Checked in first, then by time"/><ApptTable rows={[...ready].sort((a,b)=>(a.status==="checked-in"?0:1)-(b.status==="checked-in"?0:1))} empty="No one waiting"/></Card>},
+      recalls:{title:"Recalls",el:<Card><CardHead title="Recalls" meta={`${overdue.length} overdue`} action="All recalls" onAction={()=>setPage("recalls")}/><RecallList recalls={recalls}/></Card>},
+    },
+    `Nursing · ${checkedIn.length} waiting for vitals`,
+    <PB onClick={()=>setPage("flow")}>Open patient flow</PB>,
+    checkedIn.length>0&&<Alert tone="amber" title={`${checkedIn.length} patient${checkedIn.length>1?"s":""} waiting for vitals`} meta={checkedIn.map(a=>a.patient).join(", ")} onClick={()=>setPage("flow")} style={{marginBottom:12}}/>
   );}
 
   if(r==="doctor"){
     const mine=todayAppts.filter(a=>a.doctor==="Dr. Patel");
     const nextMine=mine.find(a=>a.status==="checked-in")||mine.find(a=>a.status==="scheduled");
-    return(
-    <PageWrap>
-      {dayHeader(`${user.name} · ${mine.length} patients on your schedule`,<><XB onClick={()=>setPage("appointments")}>Calendar</XB><PB onClick={()=>setPage("flow")}>Open patient flow</PB></>)}
-      {pendingRefills.length>0&&<Alert tone="amber" title={`${pendingRefills.length} refill request${pendingRefills.length>1?"s":""} waiting for your review`} meta="Refill queue" onClick={()=>setPage("refills")} style={{marginBottom:12}}/>}
-      <Grid cols="repeat(4,minmax(0,1fr))">
-        <StatCard icon={Users} label="My patients today" value={mine.length} sub={`${mine.filter(a=>a.status==="completed").length} seen`}/>
-        <StatCard icon={UserRound} label="Next patient" value={nextMine?nextMine.time:"—"} dot={nextMine?.status==="checked-in"?C.teal:undefined} sub={nextMine?`${nextMine.patient}${nextMine.status==="checked-in"?" · checked in":""}`:"Schedule clear"}/>
-        <StatCard icon={Pill} label="Pending refills" value={pendingRefills.length} sub="Awaiting review" onClick={()=>setPage("refills")}/>
-        <StatCard icon={BellRing} label="Overdue recalls" value={overdue.length} tone="red" sub="Your patients" onClick={()=>setPage("recalls")}/>
-      </Grid>
-      <Grid cols="minmax(0,2fr) minmax(0,1fr)">
-        <Card><CardHead title="My schedule" meta={`${mine.length} visits · ${mine.reduce((s,a)=>s+a.duration,0)} min booked`} action="View all" onAction={()=>setPage("appointments")}/><ApptTable rows={mine} showDoctor={false}/></Card>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <Card><CardHead title="Recalls" meta={`${recalls.length} open`} action="All recalls" onAction={()=>setPage("recalls")}/><RecallList recalls={recalls}/></Card>
-          <UpcomingWidget appts={appts}/>
-        </div>
-      </Grid>
-    </PageWrap>
+    return roleDash(
+    {top:["stats"],left:["recalls","upcoming"],right:["schedule"],hidden:[]},
+    {
+      stats:{title:"Today in numbers",el:(
+        <Grid cols="repeat(4,minmax(0,1fr))" style={{marginBottom:0}}>
+          <StatCard icon={Users} label="My patients today" value={mine.length} sub={`${mine.filter(a=>a.status==="completed").length} seen`}/>
+          <StatCard icon={UserRound} label="Next patient" value={nextMine?nextMine.time:"—"} dot={nextMine?.status==="checked-in"?C.teal:undefined} sub={nextMine?`${nextMine.patient}${nextMine.status==="checked-in"?" · checked in":""}`:"Schedule clear"}/>
+          <StatCard icon={Pill} label="Pending refills" value={pendingRefills.length} sub="Awaiting review" onClick={()=>setPage("refills")}/>
+          <StatCard icon={BellRing} label="Overdue recalls" value={overdue.length} tone="red" sub="Your patients" onClick={()=>setPage("recalls")}/>
+        </Grid>)},
+      schedule:{title:"My schedule",el:<Card><CardHead title="My schedule" meta={`${mine.length} visits · ${mine.reduce((s,a)=>s+a.duration,0)} min booked`} action="View all" onAction={()=>setPage("appointments")}/><ApptTable rows={mine} showDoctor={false}/></Card>},
+      recalls:{title:"Recalls",el:<Card><CardHead title="Recalls" meta={`${recalls.length} open`} action="All recalls" onAction={()=>setPage("recalls")}/><RecallList recalls={recalls}/></Card>},
+      upcoming:{title:"Tomorrow",el:<UpcomingWidget appts={appts}/>},
+    },
+    `${user.name} · ${mine.length} patients on your schedule`,
+    <><XB onClick={()=>setPage("appointments")}>Calendar</XB><PB onClick={()=>setPage("flow")}>Open patient flow</PB></>,
+    pendingRefills.length>0&&<Alert tone="amber" title={`${pendingRefills.length} refill request${pendingRefills.length>1?"s":""} waiting for your review`} meta="Refill queue" onClick={()=>setPage("refills")} style={{marginBottom:12}}/>
   );}
 
   // ── Admin: the office admin's console ──
@@ -1958,7 +1997,7 @@ function Dashboard({user,setPage,appts,recalls,refillRequests,inventory=[],staff
     )},
   };
   return(
-    <DashboardLayout storageKey={`medplus.dashboard.${r}`} panels={panels} defaults={ADMIN_DASH_DEFAULT}
+    <DashboardLayout storageKey={dashKey} legacyKey={`medplus.dashboard.${r}`} canCustomise={canCustomise} panels={panels} defaults={ADMIN_DASH_DEFAULT}
       header={customize=>(<>
       <PageHeader title={new Date(TODAY+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}
         status={<Badge color={attention?"amber":"green"}>{attention?`${attention} need${attention===1?"s":""} attention`:"Running smoothly"}</Badge>}
@@ -2957,6 +2996,7 @@ function InventoryPage({inventory,setInventory}){
 
 // ─── StaffSchedulePage ─────────────────────────────────────────────────────────
 function StaffSchedulePage({staffSchedule,setStaffSchedule}){
+  const STAFF_LIST=useStaff().filter(s=>s.status==="active");
   const[weekOffset,setWeekOffset]=useState(0);
   const[editCell,setEditCell]=useState(null);
   const[shiftForm,setShiftForm]=useState({startTime:"08:00",endTime:"17:00",type:"regular"});
@@ -3108,7 +3148,7 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
   const[showReferralForm,setShowReferralForm]=useState(false);
   const[referralForm,setReferralForm]=useState({specialist:"",facility:"",reason:"",notes:""});
   const[editingReferral,setEditingReferral]=useState(null);
-  const p=PERMS[user.role];
+  const p=permsFor(user);
   const vitalHistory=vitals[patient.id]||[];
   const v=vitalHistory.length>0?vitalHistory[vitalHistory.length-1]:null;
   const rxs=rx[patient.id]||[];const ptN=notes[patient.id]||[];
@@ -3188,9 +3228,9 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
           {p.prescriptions&&rxs.length>0&&<XB onClick={printRx}><Icon as={Printer}/>Print Rx</XB>}
         </>}/>
       {patient.allergies.length>0&&<Alert tone="red" title={`Allergies: ${patient.allergies.join(", ")}`} meta={`${patient.allergies.length} on record`} style={{marginBottom:12}}
-        actions={(p.vitals||user.role==="doctor")&&!addingAllergy?<button className="text-link" onClick={()=>setAddingAllergy(true)}>Add allergy</button>:null}/>}
+        actions={(p.vitals||p.writeRx)&&!addingAllergy?<button className="text-link" onClick={()=>setAddingAllergy(true)}>Add allergy</button>:null}/>}
       <Card style={{marginBottom:12,paddingBottom:8}}>
-        <CardHead title="Patient information">{patient.allergies.length===0&&(p.vitals||user.role==="doctor")&&!addingAllergy&&<button className="text-link" style={{fontSize:12}} onClick={()=>setAddingAllergy(true)}>Add allergy</button>}</CardHead>
+        <CardHead title="Patient information">{patient.allergies.length===0&&(p.vitals||p.writeRx)&&!addingAllergy&&<button className="text-link" style={{fontSize:12}} onClick={()=>setAddingAllergy(true)}>Add allergy</button>}</CardHead>
         <KVGrid items={[
           ["Date of birth",fmt(patient.dob)],
           ["Phone",patient.phone||"—"],
@@ -3272,7 +3312,7 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
         </div>
       )}
       {tab==="problems"&&(()=>{
-        const canWriteProblems=p.prescriptions||user.role==="doctor";
+        const canWriteProblems=p.writeRx;
         const[showAddProblem,setShowAddProblem]=useState(false);
         const[newProb,setNewProb]=useState({problem:"",icd:"",status:"active",onset:"",notes:""});
         const[editingProblemId,setEditingProblemId]=useState(null);
@@ -3414,7 +3454,7 @@ function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,notes,set
         </table>):<div style={{color:C.muted,fontSize:13}}>No prescriptions on file.</div>}
       </Card>)}
       {tab==="labs"&&(()=>{
-        const canOrderLabs=p.prescriptions||user.role==="doctor";
+        const canOrderLabs=p.writeRx;
         const[showOrderForm,setShowOrderForm]=useState(false);
         const[orderForm,setOrderForm]=useState({name:"",orderedBy:user.name});
         const[enterResultsId,setEnterResultsId]=useState(null);
@@ -3844,8 +3884,8 @@ function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes
       {!loading&&<>
       <PageHeader title="Patients" meta={`${patients.length} registered · ${patients.filter(p=>p.active!==false).length} active`}
         actions={<>
-          {PERMS[user.role].refills&&!PERMS[user.role].refillApprove&&setPage&&<XB onClick={()=>setPage("refills")}><Icon as={Pill}/>Refill queue</XB>}
-          {(user.role==="receptionist"||user.role==="admin")&&<PB onClick={()=>setShowNew(true)}><Icon as={Plus}/>New patient</PB>}
+          {permsFor(user).refills&&!permsFor(user).refillApprove&&setPage&&<XB onClick={()=>setPage("refills")}><Icon as={Pill}/>Refill queue</XB>}
+          {permsFor(user).registerPatients&&<PB onClick={()=>setShowNew(true)}><Icon as={Plus}/>New patient</PB>}
         </>}/>
       {/* ── Filter / Sort bar ── */}
       <div style={{marginBottom:12,display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
@@ -3895,7 +3935,7 @@ function PatientsPage({user,patients,setPatients,vitals,setVitals,rx,setRx,notes
                         {[
                           ["Book appointment",()=>{setQuickMenu(null);setQuickNewAppt(p);}],
                           ["Add recall",()=>{setQuickMenu(null);setQuickRecall(p);}],
-                          ...(PERMS[user.role].vitals?[["Record vitals",()=>{setQuickMenu(null);setQuickVitals(p);}]]:[]),
+                          ...(permsFor(user).vitals?[["Record vitals",()=>{setQuickMenu(null);setQuickVitals(p);}]]:[]),
                           ["Open chart",()=>{setQuickMenu(null);setSel(p);}],
                         ].map(([lbl,fn])=>(
                           <button key={lbl} role="menuitem" onClick={fn} className="icon-btn" style={{display:"block",width:"100%",textAlign:"left",height:34,padding:"0 10px",border:"none",borderRadius:6,fontSize:13,color:C.text,cursor:"pointer",fontFamily:"inherit"}}>{lbl}</button>
@@ -4060,7 +4100,105 @@ function RecallsPage({recalls,setRecalls,patients,appts,setAppts,blockTimes}){
   );
 }
 
-function AdminPage({auditLog}){
+const changedPerms=a=>Object.keys(a.perms||{}).filter(k=>a.perms[k]!==roleDefaults(a.role)[k]).length;
+
+function UsersTab({accounts,user,onAdd,onEdit}){
+  const th={padding:"12px 16px 8px",textAlign:"left",fontSize:12,fontWeight:400,color:C.muted,borderBottom:`1px solid ${C.border}`};
+  const td={padding:"12px 16px",fontSize:13,color:C.text2};
+  return(
+    <Card>
+      <CardHead title="Staff users" meta={`${accounts.length} accounts`}><button className="btn btn-primary btn-sm" onClick={onAdd}><Icon as={Plus} size={14}/>Add user</button></CardHead>
+      <table className="tbl" style={{width:"100%",borderCollapse:"collapse"}}>
+        <thead><tr>{["Name","Username","Role","Access","Status","Last sign-in",""].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+        <tbody>{accounts.map((a,i)=>{const n=changedPerms(a);return(
+          <tr key={a.id} className="row-link" onClick={()=>onEdit(a)} style={{borderBottom:i<accounts.length-1?`1px solid ${C.border}`:"none"}}>
+            <td style={{...td,color:C.text,fontWeight:500}}>{a.name}{a.id===user?.id&&<span style={{color:C.muted,fontWeight:400}}> (you)</span>}<div style={{fontSize:12,color:C.muted,fontWeight:400,marginTop:2}}>{a.title}</div></td>
+            <td style={{...td,fontFamily:C.mono,fontSize:12,color:C.muted}}>{a.username}</td>
+            <td style={td}>{ROLE_LABEL[a.role]}</td>
+            <td style={td}>{n?<Badge color="amber">{n} custom</Badge>:<span style={{color:C.muted}}>Role default</span>}</td>
+            <td style={td}><Badge color={a.status==="active"?"green":"neutral"}>{a.status==="active"?"Active":"Inactive"}</Badge></td>
+            <td style={{...td,fontFamily:C.mono,fontVariantNumeric:"tabular-nums"}}>{a.lastLogin||"Never"}</td>
+            <td style={{...td,textAlign:"right"}}><button className="btn btn-secondary btn-sm" onClick={e=>{e.stopPropagation();onEdit(a);}}>Edit</button></td>
+          </tr>);})}</tbody>
+      </table>
+    </Card>
+  );
+}
+
+function AccountModal({account,accounts,self,onSave,onClose}){
+  const isNew=!account, isSelf=account&&self&&account.id===self.id;
+  const[f,setF]=useState(()=>account?{...account,password:""}:{name:"",username:"",password:"",title:"",role:"nurse",status:"active",perms:{}});
+  const[err,setErr]=useState("");
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  const eff=permsFor(f), defs=roleDefaults(f.role);
+  const toggle=(key,on)=>setF(x=>{
+    const next={...permsFor(x),[key]:on};
+    // keep read/write pairs consistent
+    Object.entries(PERM_NEEDS).forEach(([w,r])=>{if(key===w&&on)next[r]=true;if(key===r&&!on)next[w]=false;});
+    const d=roleDefaults(x.role),perms={};
+    PERM_GROUPS.flatMap(g=>g.items).forEach(([k])=>{if(!!next[k]!==!!d[k])perms[k]=!!next[k];});
+    return{...x,perms};
+  });
+  const nCustom=Object.keys(f.perms||{}).length;
+  const save=()=>{
+    const username=f.username.trim().toLowerCase();
+    if(!f.name.trim()||!username)return setErr("Name and username are required");
+    if(!/^[a-z0-9._-]+$/.test(username))return setErr("Usernames can use letters, numbers, dots, dashes and underscores");
+    if(accounts.some(a=>a.username===username&&a.id!==account?.id))return setErr(`The username "${username}" is already taken`);
+    if(isNew&&f.password.length<8)return setErr("Password needs at least 8 characters");
+    if(!isNew&&f.password&&f.password.length<8)return setErr("New password needs at least 8 characters");
+    const{password,...rest}=f;
+    onSave({...rest,name:f.name.trim(),title:f.title.trim()||ROLE_LABEL[f.role],username,password:password||account.password});
+  };
+  const row={display:"flex",alignItems:"flex-start",gap:10,padding:"8px 0",fontSize:13,color:C.text,cursor:"pointer"};
+  return(
+    <Modal title={isNew?"Add user":`Edit ${account.name}`} onClose={onClose} width={680}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:20}}>
+        <FF label="Full name"><input style={IS} value={f.name} onChange={e=>set("name",e.target.value)} placeholder="e.g. Dr. Ana Ruiz" autoFocus={isNew}/></FF>
+        <FF label="Job title"><input style={IS} value={f.title} onChange={e=>set("title",e.target.value)} placeholder={ROLE_LABEL[f.role]}/></FF>
+        <FF label="Username"><input style={{...IS,fontFamily:C.mono}} value={f.username} onChange={e=>set("username",e.target.value)} autoComplete="off"/></FF>
+        <FF label={isNew?"Password":"New password"}><input style={IS} type="password" value={f.password} onChange={e=>set("password",e.target.value)} placeholder={isNew?"At least 8 characters":"Leave blank to keep the current one"} autoComplete="new-password"/></FF>
+        <FF label="Role"><select style={SS} value={f.role} disabled={isSelf} onChange={e=>setF(x=>({...x,role:e.target.value,perms:{}}))}>{DEMO_ORDER.map(r=><option key={r} value={r}>{ROLE_LABEL[r]}</option>)}</select></FF>
+        <FF label="Status"><select style={SS} value={f.status} disabled={isSelf} onChange={e=>set("status",e.target.value)}><option value="active">Active, can sign in</option><option value="inactive">Inactive, can't sign in</option></select></FF>
+      </div>
+
+      <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:12,borderTop:`1px solid ${C.border}`,paddingTop:16,marginBottom:4}}>
+        <div>
+          <div style={{fontSize:15,fontWeight:600,color:C.text}}>What this account can use</div>
+          <div style={{fontSize:12,color:C.muted,marginTop:2}}>Starts from the {ROLE_LABEL[f.role].toLowerCase()} defaults. {nCustom?`${nCustom} changed from the default.`:"No changes."}</div>
+        </div>
+        {nCustom>0&&<button className="text-link" style={{fontSize:13}} onClick={()=>set("perms",{})}>Reset to role defaults</button>}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:"0 24px"}}>
+        {PERM_GROUPS.map(g=>(
+          <div key={g.label}>
+            <div style={{fontSize:12,color:C.muted,margin:"12px 0 2px"}}>{g.label}</div>
+            {g.items.map(([k,label,hint])=>{
+              const locked=isSelf&&k==="admin";
+              const changed=!!eff[k]!==!!defs[k];
+              return(
+                <label key={k} style={{...row,cursor:locked?"default":"pointer",opacity:locked?0.6:1}} title={locked?"You can't remove your own admin access":undefined}>
+                  <input type="checkbox" checked={!!eff[k]} disabled={locked} onChange={e=>toggle(k,e.target.checked)} style={{width:15,height:15,marginTop:1,cursor:"inherit",accentColor:"var(--c-navymid)"}}/>
+                  <span style={{minWidth:0}}>{label}{changed&&<span style={{fontSize:11,color:C.amber,marginLeft:6}}>changed</span>}{hint&&<span style={{display:"block",fontSize:12,color:C.muted}}>{hint}</span>}</span>
+                </label>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {err&&<div role="alert" style={{marginTop:16}}><Alert tone="red" title={err}/></div>}
+      <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:20}}>
+        <XB onClick={onClose}>Cancel</XB>
+        <PB onClick={save}>{isNew?"Create account":"Save changes"}</PB>
+      </div>
+    </Modal>
+  );
+}
+
+function AdminPage({auditLog,accounts,setAccounts,user,addAudit,showToast}){
+  const STAFF_LIST=accounts;
+  const[editing,setEditing]=useState(null);   // account being edited, or "new"
   const[tab,setTab]=useState("users");
   const[loginFilter,setLoginFilter]=useState("all");
   const filteredLogins=loginFilter==="all"?INIT_LOGIN_HISTORY:INIT_LOGIN_HISTORY.filter(l=>l.status===loginFilter);
@@ -4070,7 +4208,15 @@ function AdminPage({auditLog}){
       <div role="tablist" style={{display:"flex",gap:24,marginBottom:12,borderBottom:`1px solid ${C.border}`}}>
         {["users","audit log","login history","backup"].map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"10px 0",border:"none",background:"none",cursor:"pointer",fontSize:14,fontWeight:tab===t?500:400,color:tab===t?C.text:C.muted,borderBottom:tab===t?`2px solid ${C.navyMid}`:"2px solid transparent",marginBottom:-1,textTransform:"none",fontFamily:"inherit"}}>{t.charAt(0).toUpperCase()+t.slice(1)}</button>)}
       </div>
-      {tab==="users"&&(<Card><div style={{padding:"16px 20px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{fontWeight:600,fontSize:15,color:C.text}}>Staff users</div><button className="btn btn-primary btn-sm"><Icon as={Plus} size={14}/>Add user</button></div><table className="tbl" style={{width:"100%",borderCollapse:"collapse"}}><thead><tr>{["Name","Role","Status","Last sign-in",""].map(h=><th key={h} style={{padding:"12px 16px 8px",textAlign:"left",fontSize:12,fontWeight:400,color:C.muted,borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead><tbody>{STAFF_LIST.map((s,i)=><tr key={s.id} style={{borderBottom:i<STAFF_LIST.length-1?`1px solid ${C.border}`:"none"}}><td style={{padding:"12px 16px",fontWeight:500,fontSize:13,color:C.text}}>{s.name}</td><td style={{padding:"12px 16px"}}><span style={{fontSize:13,color:C.text2,textTransform:"capitalize"}}>{s.role}</span></td><td style={{padding:"12px 16px"}}><Badge color={s.status==="active"?"green":"neutral"}>{s.status}</Badge></td><td style={{padding:"12px 16px",fontSize:13,color:C.text2,fontFamily:C.mono,fontVariantNumeric:"tabular-nums"}}>{s.lastLogin}</td><td style={{padding:"12px 16px",textAlign:"right"}}><button className="btn btn-secondary btn-sm">Edit</button></td></tr>)}</tbody></table></Card>)}
+      {tab==="users"&&<UsersTab accounts={accounts} user={user} onAdd={()=>setEditing("new")} onEdit={a=>setEditing(a)}/>}
+      {editing&&<AccountModal account={editing==="new"?null:editing} accounts={accounts} self={user} onClose={()=>setEditing(null)}
+        onSave={acc=>{
+          const isNew=editing==="new";
+          setAccounts(prev=>isNew?[...prev,{...acc,id:Math.max(0,...prev.map(a=>a.id))+1,lastLogin:""}]:prev.map(a=>a.id===acc.id?acc:a));
+          addAudit&&addAudit(isNew?"Created account":"Updated account",`${acc.name} (${acc.username})`,"Admin");
+          showToast&&showToast(isNew?"Account created":"Account updated");
+          setEditing(null);
+        }}/>}
       {tab==="audit log"&&(<Card style={{padding:"16px 20px 8px"}}><div style={{fontWeight:600,fontSize:15,color:C.text,marginBottom:12}}>Audit log</div><AuditLogTab auditLog={auditLog||[]}/></Card>)}
       {tab==="login history"&&(
         <Card>
@@ -4240,7 +4386,7 @@ function SettingsPage({user,settings,setSettings,setPage,blockTimes,setBlockTime
 
 // ─── RefillQueuePage ───────────────────────────────────────────────────────────
 function RefillQueuePage({user,patients,rx,setRx,refillRequests,setRefillRequests}){
-  const p=PERMS[user.role];
+  const p=permsFor(user);
   const[newReq,setNewReq]=useState({patientId:"",medication:""});
   const[patSearch,setPatSearch]=useState("");
   const[patOpen,setPatOpen]=useState(false);
@@ -4524,14 +4670,14 @@ function VitalsTrendChart({data, field}){
 
 // ─── TasksPage ────────────────────────────────────────────────────────────────
 function TasksPage({user, tasks, setTasks}){
-  const p=PERMS[user.role];
+  const p=permsFor(user);
   const [view, setView]=useState("my");
   const [expanded, setExpanded]=useState(null);
   const [showNew, setShowNew]=useState(false);
   const [editNote, setEditNote]=useState({});
   const [editStatus, setEditStatus]=useState({});
   const [newTask, setNewTask]=useState({title:"",assignedTo:"nurse",patientId:"",priority:"medium",due:"",note:""});
-  const canCreate=p.admin||user.role==="doctor"||user.role==="admin";
+  const canCreate=p.createTasks;
   const myTasks=tasks.filter(t=>t.assignedTo===user.role);
   const assignedByMe=tasks.filter(t=>t.assignedBy===user.role);
   const displayed=view==="my"?myTasks:view==="assigned"?assignedByMe:tasks;
@@ -4717,10 +4863,11 @@ function AuditLogTab({auditLog}){
   );
 }
 
-function LoginPage({onLogin}){
+function LoginPage({onLogin,accounts}){
+  const demoUsers=DEMO_ORDER.map(u=>accounts.find(a=>a.username===u&&a.demo)).filter(Boolean);
   const[u,su]=useState("");const[p,sp]=useState("");const[err,se]=useState("");const[loading,sl]=useState(false);
   const quick=async(usr)=>{sl(true);await new Promise(r=>setTimeout(r,450));onLogin(usr);};
-  const submit=async()=>{sl(true);se("");await new Promise(r=>setTimeout(r,600));const f=DEMO_USERS.find(x=>x.username===u&&x.password===p);if(f)onLogin(f);else{se("Username or password is incorrect");sl(false);}};
+  const submit=async()=>{sl(true);se("");await new Promise(r=>setTimeout(r,600));const f=accounts.find(x=>x.username===u.trim().toLowerCase()&&x.password===p);if(f&&f.status!=="active"){se("This account is inactive. Ask the office admin to turn it back on.");sl(false);}else if(f)onLogin(f);else{se("Username or password is incorrect");sl(false);}};
   return(
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
       <div style={{width:"100%",maxWidth:440}}>
@@ -4731,7 +4878,7 @@ function LoginPage({onLogin}){
 
         <div style={{color:C.text2,fontSize:13,fontWeight:500,marginBottom:8}}>Demo accounts</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:24}}>
-          {DEMO_USERS.map(usr=>(
+          {demoUsers.map(usr=>(
             <button key={usr.username} onClick={()=>quick(usr)} disabled={loading} className="role-btn" style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:8,padding:12,cursor:loading?"default":"pointer",textAlign:"left",fontFamily:"inherit",display:"flex",flexDirection:"column",gap:8}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{width:28,height:28,borderRadius:6,background:C.raised,border:`1px solid ${C.border}`,color:C.text,display:"flex",alignItems:"center",justifyContent:"center"}}><Icon as={ROLE_ICON[usr.role]}/></div>
@@ -4758,7 +4905,15 @@ function LoginPage({onLogin}){
 }
 
 export default function App(){
-  const[user,setUser]=useState(null);const[page,setPage]=useState("dashboard");
+  const[accounts,setAccounts]=useState(INIT_ACCOUNTS);
+  // Load saved accounts after mount (keeps server and client HTML the same), then save every change
+  const accountsLoaded=useRef(false);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem(ACCOUNTS_KEY));if(Array.isArray(saved)&&saved.length)setAccounts(saved);}catch{}accountsLoaded.current=true;},[]);
+  useEffect(()=>{if(accountsLoaded.current)try{localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(accounts));}catch{}},[accounts]);
+  const[sessionId,setSessionId]=useState(null);
+  // The signed-in account is read live, so permission changes apply straight away
+  const user=accounts.find(a=>a.id===sessionId&&a.status==="active")||null;
+  const setUser=u=>setSessionId(u?u.id:null);const[page,setPage]=useState("dashboard");
   const[patients,setPatients]=useState(INIT_PATIENTS);
   const[appts,setAppts]=useState(INIT_APPTS);
   const[recalls,setRecalls]=useState(INIT_RECALLS);
@@ -4863,12 +5018,12 @@ export default function App(){
     return()=>document.removeEventListener("keydown",handler);
   },[]);
 
-  if(!user)return<LoginPage onLogin={u=>{setUser(u);setPage("dashboard");setRecentPatients([]);}}/>;
-  const p=PERMS[user.role];
+  if(!user)return<LoginPage accounts={accounts} onLogin={u=>{setUser(u);setPage("dashboard");setRecentPatients([]);}}/>;
+  const p=permsFor(user);
   const overdueCount=recalls.filter(r=>r.urgency==="high").length;
   const pendingRefills=refillRequests.filter(r=>r.status==="pending").length;
 
-  const unreadMsgCount = STAFF_LIST
+  const unreadMsgCount = accounts
     .filter(s => s.username !== user.username)
     .reduce((sum, contact) => {
       const key = buildConvoKey(user.username, contact.username);
@@ -4888,10 +5043,11 @@ export default function App(){
     tasks:p.tasks?<TasksPage user={user} tasks={tasks} setTasks={setTasks}/>:<Locked msg="Tasks are not available for your role."/>,
     inventory:p.inventory?<InventoryPage inventory={inventory} setInventory={setInventory}/>:<Locked msg="Inventory is not available for your role."/>,
     staffschedule:p.staffSchedule?<StaffSchedulePage staffSchedule={staffSchedule} setStaffSchedule={setStaffSchedule}/>:<Locked msg="Staff schedule is restricted to administrators."/>,
-    admin:p.admin?<AdminPage auditLog={auditLog}/>:<Locked msg="Admin panel is restricted to administrators only."/>,
+    admin:p.admin?<AdminPage auditLog={auditLog} accounts={accounts} setAccounts={setAccounts} user={user} addAudit={addAudit} showToast={showToast}/>:<Locked msg="Admin panel is restricted to administrators only."/>,
     settings:p.settings?<SettingsPage user={user} settings={settings} setSettings={setSettings} setPage={setPage} blockTimes={blockTimes} setBlockTimes={setBlockTimes} themePref={themePref} setThemePref={setThemePref}/>:<Locked msg="Settings are restricted to doctors and admins."/>,
   };
   return(
+    <StaffContext.Provider value={accounts}>
     <div style={{display:"flex",height:"100vh",fontFamily:"var(--font-sans), system-ui, sans-serif",overflow:"hidden"}}>
       {globalSearchOpen&&<GlobalSearch patients={patients} appts={appts} onClose={()=>setGlobalSearchOpen(false)} onSelectPatient={(pt)=>{setOpenPatientId(pt.id);setPage("patients");setGlobalSearchOpen(false);onOpenPatient(pt);}} onSelectAppt={()=>{setPage("appointments");setGlobalSearchOpen(false);}}/>}
       {eodModal&&<EndOfDayModal onClose={()=>setEodModal(false)}/>}
@@ -4910,5 +5066,6 @@ export default function App(){
         </div>
       </main>
     </div>
+    </StaffContext.Provider>
   );
 }

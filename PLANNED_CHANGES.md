@@ -154,7 +154,10 @@ Direction changed after a reference dashboard: an operations console. Ink (`#121
 - [ ] Light and dark mode for every role (part of step 7)
 
 **Features**
-- [ ] Customisable dashboards for doctor, nurse and receptionist using the same `DashboardLayout` (only the office admin has it now)
+- [x] Customisable dashboards for every account (2026-11-18). Doctor, nurse and receptionist dashboards are now panels in `DashboardLayout` (stats row, patient flow, schedule/appointments, recalls, tomorrow, ready for vitals). Layouts are saved per account (`medplus.dashboard.user.<username>`); the old per-role layout is picked up once. The admin can switch Customise off per account.
+- [x] **Accounts and permissions (2026-11-18).** Admin panel → Users: "Add user" and "Edit" open an account editor (name, job title, username, password, role, active/inactive) with a checklist of what the account can use: pages, clinical actions (see/record vitals, read/write notes, see prescriptions, prescribe, approve refills) and work (register patients, create tasks, customise dashboard). Each account starts from its role's defaults; changes show as "changed" and the list shows "N custom". "Reset to role defaults" clears them. Write permissions switch on their read permission. The admin can't remove their own admin access or deactivate themselves. Inactive accounts can't sign in. Permission changes apply straight away. New accounts appear in Messages, Staff schedule and the admin dashboard. Changes go to the audit log.
+  - Permissions are resolved by `permsFor(user)` (role defaults in `PERMS` plus the account's `perms`). Accounts live in `INIT_ACCOUNTS` and are saved in localStorage (`medplus.accounts`); clear it to get the demo accounts back.
+  - **Demo only:** passwords are plain text in the browser, and the checks run in the browser. See Security below before real use.
 - [ ] Save dashboard layouts to the user's account instead of the browser, so they follow the user to other computers (needs a backend; today it's `localStorage`, key `medplus.dashboard.<role>`)
 
 **Housekeeping**
@@ -194,7 +197,7 @@ Suggested routine: `/init` once, `/run` while working, `/code-review` before eac
 ---
 
 ## Git
-- Work is on the local branch **`ui-redesign`** (latest commit `be259fb`, everything committed). **Not pushed and not merged into `main`.**
+- Work is on the local branch **`ui-redesign`** (all committed; not pushed yet, run `git push -u origin ui-redesign`). **Not pushed and not merged into `main`.**
 - Back it up: `git push -u origin ui-redesign`
 - Put it on main when you're happy: `git checkout main && git merge ui-redesign`
 
