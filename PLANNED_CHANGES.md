@@ -146,8 +146,8 @@ Direction changed after a reference dashboard: an operations console. Ink (`#121
 
 **Check in the browser** (couldn't be confirmed by screenshot)
 - [ ] Nurse and receptionist dashboards
-- [ ] Modals: new appointment, new patient (document scan), prescription, visit note, recall, follow-up, end-of-day checklist
-- [ ] Messages page and popup in the new design
+- [x] Modals checked in the browser (2026-11-18): new appointment, new patient (document scan), prescription (incl. allergy cross-reactivity warning), visit note, vitals, recall, follow-up, end-of-day checklist. All save, all close with Escape, light and dark.
+- [x] Messages page and popup checked (2026-11-18): opening full page and sending a message work.
 - [ ] Patient chart tab row lines up with the page title (same fix as the Admin panel tabs)
 - [ ] Cards that lost the line under their title (Admin "Staff users" and similar) look right
 - [ ] Dashboard customise mode: dragging panels with the mouse (the move buttons, hiding, reset and saving after a reload were tested; mouse dragging wasn't)
@@ -167,6 +167,10 @@ Direction changed after a reference dashboard: an operations console. Ink (`#121
 - [ ] Save dashboard layouts to the user's account instead of the browser, so they follow the user to other computers (needs a backend; today it's `localStorage`, key `medplus.dashboard.<role>`)
 
 **Bugs fixed 2026-11-18**
+- [x] `components/App.jsx` split into modules (`lib/`, `ui.jsx`, `shell.jsx`, `dashboard.jsx`, `modals.jsx`, `Messages.jsx`, `pages/`); App.jsx is now the app root only. All pages screenshot pixel-identical before and after.
+- [x] Patient chart crashed the app when opening the **Notes, Problems or Labs** tab (React state created inside the tab) or the **Timeline** tab (read a removed data set). All 11 tabs open now.
+- [x] End-of-day checklist could never appear (compared appointments with the real date) and only checked completed visits; now shows once the last visit of the day is completed or marked no-show. No-show recalls and follow-up dates count from the demo day.
+- [x] Every dialog closes with Escape (top one only); follow-up and end-of-day are proper dialogs. Remaining Title Case dialog labels are sentence case.
 - [x] The open patient chart was a stale copy: a new allergy (or other edit) didn't show on the chart or in printouts until it was closed and reopened. The chart now reads the live patient record.
 
 **Housekeeping**
@@ -193,10 +197,10 @@ What's in the code now (checked 2026-11-16):
 ---
 
 ## Tools to use while working on this (suggested 2026-11-14)
-- [ ] **`/init`**: creates a `CLAUDE.md` describing the project (the Next.js app is the root; `clinic-demo/` is the old Vite version; how to run it), so new sessions start with context. Not done yet.
+- [x] **`/init`**: `CLAUDE.md` written (2026-11-18): commands, architecture, and the rules that span files (demo date, permissions, printouts, hooks, theme).
 - **`/run`**: starts the app and checks it works.
 - **`/code-review`**: checks changes for bugs before committing or pushing (e.g. `/code-review medium`).
-- **`/simplify`**: cleans up changed code. `components/App.jsx` is ~4,900 lines now, so splitting it into files would help (see Future ideas).
+- **`/simplify`**: cleans up changed code. The code is split into files per page now (see CLAUDE.md).
 - **`/security-review`**: see Security above.
 - **`/fewer-permission-prompts`**: pre-allows the safe commands you keep approving.
 - **`skill-creator`**: build your own skill, e.g. a `/ui-check` that starts the dev server and reviews UI changes in one step.
@@ -214,7 +218,7 @@ Suggested routine: `/init` once, `/run` while working, `/code-review` before eac
 
 ## Future ideas
 - [ ] **Real backend** (database + API) so data survives a refresh and is shared between staff. Everything in the Security section depends on this.
-- [ ] **Split `components/App.jsx`** into files per page and shared components (`components/ui/`, `pages/…`). It's ~4,900 lines in one file, which makes every change slower and riskier.
+- [x] **Split `components/App.jsx`** into files (done 2026-11-18, see "Bugs fixed 2026-11-18").
 - [ ] **Make the dashboard's "Reassign visit" and "Extend shift" do the job directly.** Right now they just open Appointments or Staff schedule.
 - [ ] **Real "today"**: the app is pinned to Feb 25, 2026 at 10:10 (`DEMO_TODAY`, `DEMO_NOW`). Switch to the real date and time when it's used for real.
 - [ ] **Notifications** for urgent things (a patient waiting too long, critical vitals, low stock), which the Settings toggles already hint at.
