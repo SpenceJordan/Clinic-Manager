@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Check, CircleCheck, FileText, ScanLine, Moon, NotebookPen, Info } from "lucide-react";
-import { ALLERGY_CROSS_REACTIVITY, DRUG_INTERACTIONS } from "./lib/data";
+import { ALLERGY_CROSS_REACTIVITY, DRUG_INTERACTIONS, DEMO_TODAY } from "./lib/data";
 import { addDaysToDate, fmt, nowTime, today } from "./lib/utils";
-import { Alert, C, FF, FR, IS, Icon, LS, LoadingButton, Modal, OK, PB, SS, XB } from "./ui";
+import { Alert, C, FF, FR, IS, Icon, LS, LoadingButton, Modal, OK, PB, SS, XB, useEscapeToClose } from "./ui";
 
 export function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefillTime,blockTimes=[],prefill={}}){
   const[f,sf]=useState({pid:prefill.pid||"",date:prefill.date||defaultDate||today(),time:prefillTime||"09:00",dur:"30",doc:prefill.doc||"Dr. Patel",type:prefill.type||"routine",notes:prefill.notes||""});
@@ -70,7 +70,7 @@ export function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefi
     },500);
   };
   return(
-    <Modal title="New Appointment" onClose={handleClose}>
+    <Modal title="New appointment" onClose={handleClose}>
       {ok&&<OK msg={recurring?`${previewDates.length} recurring appointments scheduled!`:"Appointment scheduled"}/>}
       <FR cols={1}><FF label="Patient"><select value={f.pid} onChange={e=>s("pid",e.target.value)} style={SS}><option value="">Select a patient…</option>{patients.map(p=><option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></FF></FR>
       {doubleBook&&<div style={{background:C.amberBg,border:`1px solid color-mix(in srgb, ${C.amber} 18%, var(--c-surface))`,borderRadius:8,padding:"10px 16px",marginBottom:12,fontSize:12,color:C.amber}}><strong>Note:</strong> {doubleBook.patient} already has an appointment at {doubleBook.time} with {doubleBook.doctor} on this date.</div>}
@@ -78,7 +78,7 @@ export function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefi
       <div style={{marginBottom:16}}>
         <label style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
           <input type="checkbox" checked={recurring} onChange={e=>setRecurring(e.target.checked)} style={{width:15,height:15}}/>
-          <span style={{fontSize:13,fontWeight:600,color:C.text}}>Recurring Appointment</span>
+          <span style={{fontSize:13,fontWeight:600,color:C.text}}>Recurring appointment</span>
         </label>
         {recurring&&(
           <div style={{marginTop:10,paddingLeft:24,display:"flex",gap:12,flexWrap:"wrap",alignItems:"flex-end"}}>
@@ -107,7 +107,7 @@ export function NewApptModal({onClose,onSave,patients,defaultDate,appts=[],prefi
           {f.doc} already has {conflict.patient} at {conflict.time} on this date.
         </Alert>
       )}
-      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={handleClose}>Cancel</XB><LoadingButton onClick={sub} disabled={!f.pid||ok} loading={savingAppt}>Schedule Appointment</LoadingButton></div>
+      <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}><XB onClick={handleClose}>Cancel</XB><LoadingButton onClick={sub} disabled={!f.pid||ok} loading={savingAppt}>Schedule appointment</LoadingButton></div>
     </Modal>
   );
 }
@@ -148,7 +148,7 @@ export function NewPatientModal({onClose,onSave}){
   const onFile=(e)=>{const file=e.target.files?.[0];if(file)runScan();};
   const onDrop=(e)=>{e.preventDefault();setDragOver(false);if(e.dataTransfer.files?.[0])runScan();};
   return(
-    <Modal title="New Patient Registration" onClose={handleClose} width={640}>
+    <Modal title="Register a new patient" onClose={handleClose} width={640}>
       {ok&&<OK msg="Patient registered"/>}
       {/* ── Document upload zone ── */}
       {!scanDone&&!scanning&&(
@@ -179,14 +179,14 @@ export function NewPatientModal({onClose,onSave}){
         <Alert tone="green" title="12 fields filled from the document" meta="Check them before registering" style={{marginBottom:16}}
           actions={<button onClick={()=>{setScanDone(false);sf({fn:"",ln:"",dob:"",gender:"",phone:"",email:"",address:"",ins:"",ins_id:"",ec_name:"",ec_phone:"",allergies:""});}} className="text-link">Clear the form</button>}/>
       )}
-      <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Personal Information</div>
+      <div style={{fontSize:12,color:C.muted,marginBottom:12}}>Personal information</div>
       <FR><FF label="First name"><input value={f.fn} onChange={e=>s("fn",e.target.value)} style={IS} placeholder="Jane"/></FF><FF label="Last name"><input value={f.ln} onChange={e=>s("ln",e.target.value)} style={IS} placeholder="Doe"/></FF></FR>
       <FR><FF label="Date of birth"><input type="date" value={f.dob} onChange={e=>s("dob",e.target.value)} style={IS}/></FF><FF label="Gender"><select value={f.gender} onChange={e=>s("gender",e.target.value)} style={SS}><option value="">Select…</option><option value="M">Male</option><option value="F">Female</option><option value="O">Other</option></select></FF></FR>
       <FR><FF label="Phone"><input value={f.phone} onChange={e=>s("phone",e.target.value)} style={IS} placeholder="555-0100"/></FF><FF label="Email"><input type="email" value={f.email} onChange={e=>s("email",e.target.value)} style={IS} placeholder="jane@email.com"/></FF></FR>
       <FR cols={1}><FF label="Address"><input value={f.address} onChange={e=>s("address",e.target.value)} style={IS} placeholder="123 Main St, City, ST 00000"/></FF></FR>
       <div style={{fontSize:12,color:C.muted,margin:"20px 0 12px"}}>Insurance</div>
       <FR><FF label="Insurance provider"><input value={f.ins} onChange={e=>s("ins",e.target.value)} style={IS} placeholder="BlueCross, Medicare…"/></FF><FF label="Member ID"><input value={f.ins_id} onChange={e=>s("ins_id",e.target.value)} style={IS}/></FF></FR>
-      <div style={{fontSize:12,color:C.muted,margin:"20px 0 12px"}}>Emergency Contact</div>
+      <div style={{fontSize:12,color:C.muted,margin:"20px 0 12px"}}>Emergency contact</div>
       <FR><FF label="Name"><input value={f.ec_name} onChange={e=>s("ec_name",e.target.value)} style={IS}/></FF><FF label="Phone"><input value={f.ec_phone} onChange={e=>s("ec_phone",e.target.value)} style={IS}/></FF></FR>
       <div style={{fontSize:12,color:C.muted,margin:"20px 0 12px"}}>Clinical</div>
       <FR cols={1}><FF label="Known allergies (comma-separated)"><input value={f.allergies} onChange={e=>s("allergies",e.target.value)} style={IS} placeholder="Penicillin, Sulfa, Latex…"/></FF></FR>
@@ -205,7 +205,7 @@ export function VitalsModal({patient,onClose,onSave}){
     sok(true);setTimeout(onClose,1400);
   };
   return(
-    <Modal title={`Record Vitals — ${patient.first_name} ${patient.last_name}`} onClose={onClose} width={520}>
+    <Modal title={`Record vitals — ${patient.first_name} ${patient.last_name}`} onClose={onClose} width={520}>
       {ok&&<OK msg="Vitals recorded"/>}
       {patient.allergies.length>0&&<Alert tone="red" title="Allergies" meta={patient.allergies.join(", ")} style={{marginBottom:16}}/>}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12,marginBottom:16}}>
@@ -283,11 +283,11 @@ export function RxModal({patient,onClose,onSave,rx}){
     sok(true);setTimeout(onClose,1400);
   };
   return(
-    <Modal title={`New Prescription — ${patient.first_name} ${patient.last_name}`} onClose={handleClose} width={560}>
+    <Modal title={`New prescription — ${patient.first_name} ${patient.last_name}`} onClose={handleClose} width={560}>
       {ok&&<OK msg="Prescription saved"/>}
       {patAllergies.length>0&&(
         <div style={{background:C.redBg,border:`1px solid color-mix(in srgb, ${C.red} 18%, var(--c-surface))`,borderRadius:8,padding:"10px 16px",marginBottom:16}}>
-          <div style={{color:C.red,fontSize:12,fontWeight:500,marginBottom:4}}>Known Allergies</div>
+          <div style={{color:C.red,fontSize:12,fontWeight:500,marginBottom:4}}>Known allergies</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
             {patAllergies.map(a=><span key={a} style={{background:C.red,color:"var(--c-surface)",fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:4}}>{a}</span>)}
           </div>
@@ -374,7 +374,7 @@ export function NoteModal({patient,onClose,onSave,user,draftNotes,setDraftNotes}
         <label style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
           <input type="checkbox" checked={f.sign} onChange={e=>s("sign",e.target.checked)} style={{width:16,height:16,cursor:"pointer"}}/>
           <div>
-            <div style={{fontWeight:600,fontSize:13,color:f.sign?C.amber:C.text}}>Sign &amp; Lock Note</div>
+            <div style={{fontWeight:600,fontSize:13,color:f.sign?C.amber:C.text}}>Sign and lock note</div>
             <div style={{fontSize:12,color:C.muted,marginTop:2}}>Once signed, this note cannot be edited.</div>
           </div>
         </label>
@@ -383,7 +383,7 @@ export function NoteModal({patient,onClose,onSave,user,draftNotes,setDraftNotes}
         <XB onClick={handleClose}>Cancel</XB>
         <LoadingButton onClick={sub} disabled={!f.chief||!f.assess||ok} loading={savingNote}
           style={{background:f.sign?((!f.chief||!f.assess||ok||savingNote)?C.disabled:C.amber):((!f.chief||!f.assess||ok||savingNote)?C.disabled:C.navyMid)}}>
-          {f.sign?"Sign & Lock":"Save Draft"}
+          {f.sign?"Sign and lock":"Save draft"}
         </LoadingButton>
       </div>
     </Modal>
@@ -402,7 +402,7 @@ export function RecallModal({onClose,onSave,patients}){
     sok(true);setTimeout(onClose,1400);
   };
   return(
-    <Modal title="Add Recall Flag" onClose={onClose} width={520}>
+    <Modal title="Add recall" onClose={onClose} width={520}>
       {ok&&<OK msg="Recall flag added"/>}
       <FR cols={1}><FF label="Patient"><select value={f.pid} onChange={e=>s("pid",e.target.value)} style={SS}><option value="">Select a patient…</option>{patients.map(p=><option key={p.id} value={p.id}>{p.first_name} {p.last_name}</option>)}</select></FF></FR>
       <FR cols={1}><FF label="Reason"><input value={f.reason} onChange={e=>s("reason",e.target.value)} style={IS} placeholder="e.g. Annual physical…" list="rl"/><datalist id="rl">{reasons.map(r=><option key={r} value={r}/>)}</datalist></FF></FR>
@@ -434,7 +434,7 @@ export function FilesPopupModal({files,patientName,onClose,onContinue}){
       )}
       <div style={{display:"flex",gap:10,justifyContent:"flex-end",paddingTop:8,borderTop:`1px solid ${C.border}`}}>
         <XB onClick={onClose}>Close</XB>
-        <PB onClick={onContinue}>Continue to Visit</PB>
+        <PB onClick={onContinue}>Continue to visit</PB>
       </div>
     </Modal>
   );
@@ -442,10 +442,12 @@ export function FilesPopupModal({files,patientName,onClose,onContinue}){
 
 // ─── FollowUpModal ─────────────────────────────────────────────────────────────
 export function FollowUpModal({patient,doctor,onClose,onBook}){
-  const addDays=(n)=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split("T")[0];};
+  useEscapeToClose(onClose);
+  // Counted from the demo's fixed day, like every other date in the app
+  const addDays=(n)=>addDaysToDate(DEMO_TODAY,n);
   return(
     <div style={{position:"fixed",inset:0,background:C.overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:1500,padding:20}}>
-      <div style={{background:C.surface,borderRadius:12,width:"100%",maxWidth:400,boxShadow:"var(--shadow-lg)",border:`1px solid ${C.border}`}}>
+      <div role="dialog" aria-modal="true" aria-label="Schedule a follow-up" style={{background:C.surface,borderRadius:12,width:"100%",maxWidth:400,boxShadow:"var(--shadow-lg)",border:`1px solid ${C.border}`}}>
         <div style={{padding:"20px 24px",borderBottom:`1px solid ${C.border}`}}>
           <div style={{fontWeight:600,fontSize:16,color:C.text}}>Schedule a follow-up?</div>
           <div style={{fontSize:13,color:C.muted,marginTop:4}}>For {patient} with {doctor}</div>
@@ -468,6 +470,7 @@ export function FollowUpModal({patient,doctor,onClose,onBook}){
 
 // ─── EndOfDayModal ─────────────────────────────────────────────────────────────
 export function EndOfDayModal({onClose}){
+  useEscapeToClose(onClose);
   const[checks,setChecks]=useState({notes:false,recalls:false,schedule:false});
   const allChecked=Object.values(checks).every(Boolean);
   const toggle=(k)=>setChecks(p=>({...p,[k]:!p[k]}));
@@ -478,7 +481,7 @@ export function EndOfDayModal({onClose}){
   ];
   return(
     <div style={{position:"fixed",inset:0,background:C.overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:1500,padding:20}}>
-      <div style={{background:C.surface,borderRadius:12,width:"100%",maxWidth:440,boxShadow:"var(--shadow-lg)",border:`1px solid ${C.border}`}}>
+      <div role="dialog" aria-modal="true" aria-label="End-of-day checklist" style={{background:C.surface,borderRadius:12,width:"100%",maxWidth:440,boxShadow:"var(--shadow-lg)",border:`1px solid ${C.border}`}}>
         <div style={{padding:"20px 24px",borderBottom:`1px solid ${C.border}`}}>
           <Moon size={20} strokeWidth={1.5} aria-hidden="true" style={{color:C.text2,marginBottom:8}}/>
           <div style={{fontWeight:600,fontSize:16,color:C.text}}>End-of-day checklist</div>

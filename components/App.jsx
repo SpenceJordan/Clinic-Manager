@@ -4,8 +4,8 @@ import { CircleAlert, CircleCheck } from "lucide-react";
 import { MessagesDock, MessagesPage } from "./Messages";
 import { Dashboard } from "./dashboard";
 import { ACCOUNTS_KEY, StaffContext, isAdminAddOn, permsFor } from "./lib/accounts";
-import { INIT_ACCOUNTS, INIT_APPTS, INIT_AUDIT_LOG, INIT_BLOCK_TIMES, INIT_DOCTOR_STATUS, INIT_INVENTORY, INIT_MESSAGES, INIT_NOTES, INIT_PATIENTS, INIT_RECALLS, INIT_REFILL_REQUESTS, INIT_REMINDER_LOGS, INIT_RX, INIT_SETTINGS, INIT_STAFF_SCHEDULE, INIT_TASKS, INIT_VITALS_FULL, INIT_WAITLIST, buildConvoKey } from "./lib/data";
-import { today } from "./lib/utils";
+import { addDaysToDate } from "./lib/utils";
+import { INIT_ACCOUNTS, INIT_APPTS, INIT_AUDIT_LOG, INIT_BLOCK_TIMES, INIT_DOCTOR_STATUS, INIT_INVENTORY, INIT_MESSAGES, INIT_NOTES, INIT_PATIENTS, INIT_RECALLS, INIT_REFILL_REQUESTS, INIT_REMINDER_LOGS, INIT_RX, INIT_SETTINGS, INIT_STAFF_SCHEDULE, INIT_TASKS, INIT_VITALS_FULL, INIT_WAITLIST, buildConvoKey, DEMO_TODAY } from "./lib/data";
 import { EndOfDayModal, FollowUpModal } from "./modals";
 import { AdminPage } from "./pages/AdminPage";
 import { ApptsPage } from "./pages/AppointmentsPage";
@@ -98,14 +98,21 @@ export default function App(){
     setTimeout(()=>setToast(null),3000);
   };
 
+  // End-of-day checklist: once the last open visit of the day is completed or marked no-show.
+  // The demo runs on a fixed day (DEMO_TODAY); every appointment is dated against it.
+  const checkEndOfDay=(closedId)=>{
+    const todayAppts=appts.filter(x=>(x.date||DEMO_TODAY)===DEMO_TODAY);
+    const allDone=todayAppts.every(x=>x.id===closedId||x.status==="completed"||x.status==="no-show");
+    if(allDone&&!eodShown&&todayAppts.length>0){setEodModal(true);setEodShown(true);}
+  };
   const noShowHandler=(id)=>{
     const a=appts.find(x=>x.id===id);
     if(!a)return;
     setAppts(p=>p.map(x=>x.id===id?{...x,status:"no-show"}:x));
-    const dueDate=new Date();dueDate.setDate(dueDate.getDate()+3);
-    const dueStr=dueDate.toISOString().split("T")[0];
+    const dueStr=addDaysToDate(DEMO_TODAY,3);
     setRecalls(p=>[...p,{id:Date.now(),patient:a.patient,reason:"No-show — reschedule appointment",due:dueStr,urgency:"medium",doctor:a.doctor||""}]);
     showToast(`Recall created for ${a.patient}`,"amber");
+    checkEndOfDay(id);
   };
 
   const completeHandler=(id)=>{
@@ -113,11 +120,7 @@ export default function App(){
     if(!a)return;
     setAppts(p=>p.map(x=>x.id===id?{...x,status:"completed"}:x));
     setPendingFollowUp({patient:a.patient,doctor:a.doctor,date:a.date});
-    // EOD check
-    const todayStr=today();
-    const todayAppts=appts.filter(x=>(x.date||"2026-02-25")===todayStr);
-    const allDone=todayAppts.every(x=>x.id===id||x.status==="completed"||x.status==="no-show");
-    if(allDone&&!eodShown&&todayAppts.length>0){setEodModal(true);setEodShown(true);}
+    checkEndOfDay(id);
   };
 
   const onOpenPatient=(patient)=>{

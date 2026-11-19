@@ -290,7 +290,7 @@ export function ApptsPage({user,appts,setAppts,patients,settings,reminderLogs,se
             </div>
           ))}
           <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
-            <XB onClick={()=>{setAppts(p=>p.map(x=>x.id===cancelWaitlistAppt.appt.id?{...x,status:"no-show"}:x));setCancelWaitlistAppt(null);}}>Cancel Appointment Only</XB>
+            <XB onClick={()=>{setAppts(p=>p.map(x=>x.id===cancelWaitlistAppt.appt.id?{...x,status:"no-show"}:x));setCancelWaitlistAppt(null);}}>Cancel appointment only</XB>
             <PB onClick={()=>{
               setAppts(p=>p.map(x=>x.id===cancelWaitlistAppt.appt.id?{...x,status:"no-show"}:x));
               setWaitlist(p=>p.map(w=>w.id===cancelWaitlistAppt.waitlist[0].id?{...w,status:"contacted"}:w));

@@ -243,6 +243,17 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
   const[showInactiveRx,setShowInactiveRx]=useState(false);
   const[rxHistory]=useState(INIT_RX_HISTORY[patient.id]||{});
   const[expandedRxHistory,setExpandedRxHistory]=useState(new Set());
+  // Problems and Labs tab state (hooks must run on every render, not only while the tab is open)
+  const[showAddProblem,setShowAddProblem]=useState(false);
+  const[newProb,setNewProb]=useState({problem:"",icd:"",status:"active",onset:"",notes:""});
+  const[editingProblemId,setEditingProblemId]=useState(null);
+  const[editProb,setEditProb]=useState({});
+  const[showOrderForm,setShowOrderForm]=useState(false);
+  const[orderForm,setOrderForm]=useState({name:"",orderedBy:user.name});
+  const[enterResultsId,setEnterResultsId]=useState(null);
+  const[resultRows,setResultRows]=useState([{name:"",value:"",unit:"",low:"",high:""}]);
+  // Notes tab filters (hooks must run on every render, not only while the tab is open)
+  const[noteSearch,setNoteSearch]=useState("");const[noteDrFilter,setNoteDrFilter]=useState("All");const[noteFrom,setNoteFrom]=useState("");const[noteTo,setNoteTo]=useState("");const[signedOnly,setSignedOnly]=useState(false);
   const[addingAllergy,setAddingAllergy]=useState(false);const[newAllergy,setNewAllergy]=useState("");
   const[labResults,setLabResults]=useState(INIT_LABS[patient.id]||[]);
   const[expandedLab,setExpandedLab]=useState(null);
@@ -419,10 +430,6 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
       )}
       {tab==="problems"&&(()=>{
         const canWriteProblems=p.writeRx;
-        const[showAddProblem,setShowAddProblem]=useState(false);
-        const[newProb,setNewProb]=useState({problem:"",icd:"",status:"active",onset:"",notes:""});
-        const[editingProblemId,setEditingProblemId]=useState(null);
-        const[editProb,setEditProb]=useState({});
         const saveNewProblem=()=>{
           if(!newProb.problem)return;
           setProblems(prev=>[...prev,{...newProb,id:Date.now()}]);
@@ -561,10 +568,6 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
       </Card>)}
       {tab==="labs"&&(()=>{
         const canOrderLabs=p.writeRx;
-        const[showOrderForm,setShowOrderForm]=useState(false);
-        const[orderForm,setOrderForm]=useState({name:"",orderedBy:user.name});
-        const[enterResultsId,setEnterResultsId]=useState(null);
-        const[resultRows,setResultRows]=useState([{name:"",value:"",unit:"",low:"",high:""}]);
         const pendingLabs=labResults.filter(l=>l.status==="pending");
         const resultedLabs=labResults.filter(l=>l.status!=="pending");
         const submitOrder=()=>{
@@ -603,11 +606,11 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
                         <div style={{fontSize:12,color:C.muted,marginTop:2}}>Ordered {fmt(lab.date)} by {lab.orderedBy||"—"}</div>
                       </div>
                       <Badge color="amber">Pending</Badge>
-                      {canOrderLabs&&<button onClick={()=>{setEnterResultsId(lab.id===enterResultsId?null:lab.id);setResultRows([{name:"",value:"",unit:"",low:"",high:""}]);}} style={{fontSize:11,fontWeight:600,padding:"4px 10px",borderRadius:6,border:`1px solid ${C.navyMid}`,background:C.blueBg,color:C.navyMid,cursor:"pointer"}}>Enter Results</button>}
+                      {canOrderLabs&&<button onClick={()=>{setEnterResultsId(lab.id===enterResultsId?null:lab.id);setResultRows([{name:"",value:"",unit:"",low:"",high:""}]);}} style={{fontSize:11,fontWeight:600,padding:"4px 10px",borderRadius:6,border:`1px solid ${C.navyMid}`,background:C.blueBg,color:C.navyMid,cursor:"pointer"}}>Enter results</button>}
                     </div>
                     {enterResultsId===lab.id&&(
                       <div style={{marginTop:16,background:C.surface,borderRadius:8,padding:"16px",border:`1px solid ${C.border}`}}>
-                        <div style={{fontWeight:500,fontSize:12,color:C.muted,marginBottom:10}}>Enter Test Values</div>
+                        <div style={{fontWeight:500,fontSize:12,color:C.muted,marginBottom:10}}>Enter test values</div>
                         {resultRows.map((row,ri)=>(
                           <div key={ri} style={{display:"grid",gridTemplateColumns:"1fr 80px 80px 70px 70px auto",gap:8,marginBottom:8,alignItems:"center"}}>
                             <input value={row.name} onChange={e=>setResultRows(prev=>prev.map((r,j)=>j===ri?{...r,name:e.target.value}:r))} style={{...IS,fontSize:12}} placeholder="Test name"/>
@@ -622,7 +625,7 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
                           <button onClick={()=>setResultRows(prev=>[...prev,{name:"",value:"",unit:"",low:"",high:""}])} className="btn btn-secondary btn-sm" ><Icon as={Plus} size={14}/>Add row</button>
                           <div style={{flex:1}}/>
                           <XB onClick={()=>setEnterResultsId(null)}>Cancel</XB>
-                          <PB onClick={()=>submitResults(lab.id)}>Save Results</PB>
+                          <PB onClick={()=>submitResults(lab.id)}>Save results</PB>
                         </div>
                       </div>
                     )}
@@ -679,11 +682,6 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
         );
       })()}
       {tab==="notes"&&(()=>{
-        const [noteSearch,setNoteSearch]=React.useState("");
-        const [noteDrFilter,setNoteDrFilter]=React.useState("All");
-        const [noteFrom,setNoteFrom]=React.useState("");
-        const [noteTo,setNoteTo]=React.useState("");
-        const [signedOnly,setSignedOnly]=React.useState(false);
         const noteDoctors=["All",...Array.from(new Set(ptN.map(n=>n.doctor)))];
         const hl=(text,term)=>{
           if(!term||!text)return text||"";
@@ -863,7 +861,7 @@ export function PatientProfile({patient,onBack,user,vitals,setVitals,rx,setRx,no
         const patientFullN=`${patient.first_name} ${patient.last_name}`;
         const apptEvents=(appts||[]).filter(a=>a.patient===patientFullN).map(a=>({type:"appointment",date:a.date,title:a.type.replace(/-/g," "),detail:`${a.doctor} \u00b7 ${a.status}`,status:a.status,id:"a"+a.id}));
         const noteEvents=(notes[patient.id]||[]).map(n=>({type:"note",date:n.date,title:"Clinical Note",detail:n.chief,signed:n.signed,id:"n"+n.id}));
-        const vhEvents=(INIT_VITALS_HISTORY[patient.id]||[]).map((e,i)=>({type:"vitals",date:e.date,title:"Vitals Recorded",detail:`BP: ${e.bp}, Weight: ${e.weight}lbs`,id:"v"+i}));
+        const vhEvents=((vitals||{})[patient.id]||[]).map((e,i)=>({type:"vitals",date:e.date,title:"Vitals Recorded",detail:`BP: ${e.bp}, Weight: ${e.weight}lbs`,id:"v"+i}));
         const allEvents=[...apptEvents,...noteEvents,...vhEvents].sort((a,b)=>b.date.localeCompare(a.date));
         if(allEvents.length===0)return(
           <Card style={{padding:"40px",textAlign:"center"}}><ClipboardList size={28} strokeWidth={1.5} aria-hidden="true" style={{color:C.muted,marginBottom:8}}/><div style={{color:C.muted,fontSize:13}}>No history recorded for this patient</div></Card>

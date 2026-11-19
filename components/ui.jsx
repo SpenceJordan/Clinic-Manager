@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Plus, LayoutDashboard, CalendarDays, Columns3, Users, Pill, BellRing, ChartColumn, ListChecks, Package, CalendarClock, ShieldCheck, Briefcase, Stethoscope, HeartPulse, CalendarCheck, Check, Timer, ClipboardList, X, Lock, ChevronRight, CircleAlert, CircleCheck, Database, ScrollText, UserCog } from "lucide-react";
 
 export const AdminMark=()=><span title="Has admin access" style={{display:"inline-flex",alignItems:"center",gap:4,height:18,padding:"0 6px",borderRadius:4,fontSize:11,fontWeight:500,color:C.text,background:C.raised,border:`1px solid ${C.border}`,verticalAlign:"middle"}}><ShieldCheck size={11} strokeWidth={2} aria-hidden="true"/>Admin</span>;
@@ -203,7 +203,19 @@ export const Locked=({msg})=>(
   </div>
 );
 
+// Open dialogs, newest last: Escape closes only the top one
+const openModals=[];
+export function useEscapeToClose(onClose){
+  const closeRef=useRef(onClose); closeRef.current=onClose;
+  useEffect(()=>{
+    const me={}; openModals.push(me);
+    const onKey=e=>{if(e.key==="Escape"&&openModals[openModals.length-1]===me){e.stopPropagation();closeRef.current&&closeRef.current();}};
+    document.addEventListener("keydown",onKey);
+    return()=>{document.removeEventListener("keydown",onKey);openModals.splice(openModals.indexOf(me),1);};
+  },[]);
+}
 export function Modal({title,onClose,children,width=560}){
+  useEscapeToClose(onClose);
   return(
     <div style={{position:"fixed",inset:0,background:C.overlay,display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:20}}>
       <div role="dialog" aria-modal="true" aria-label={typeof title==="string"?title:undefined} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:12,width:"100%",maxWidth:width,maxHeight:"90vh",overflow:"auto",boxShadow:"var(--shadow-lg)",animation:"rise 220ms var(--ease)"}}>
